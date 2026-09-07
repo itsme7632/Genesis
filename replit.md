@@ -12,6 +12,20 @@ The app serves on port 5000.
 
 ## Current scope
 
-This first runnable build is a frontend MVP with a small Node static server. It includes the five core destinations (Home, Invest, Wallet, Portfolio, Markets), profile menu, asset detail and conversion flows, deposit/withdrawal preparation screens, and an Admin configuration view.
+The app is a mobile-first Genesis wallet and investment foundation with:
 
-All balances, prices, rates, and history visible in the demo are explicitly labeled as demo/reference data. G is shown as PRE-LAUNCH; no live market price, blockchain address, transaction, or withdrawal is fabricated. The next production step is to connect the structured UI to a relational backend, secure sessions, admin authorization, and custody/market integrations.
+- PostgreSQL schema covering users, sessions, assets, wallets, balances, investment products, investments, G rewards, generation events, conversions, deposits, withdrawals, transactions, market prices, platform settings, admin users, and audit logs
+- Secure password hashing with bcrypt, server-side sessions, HTTP-only cookies, session expiration, login/logout, validation, and basic login rate limiting
+- Authenticated API reads for platform configuration, wallet balances, and portfolio data
+- The five core destinations: Home, Invest, Wallet, Portfolio, and Markets
+- Profile menu, asset detail and conversion flows, deposit/withdrawal preparation screens, and a protected Admin entry point
+
+New accounts start with zero database-backed balances. No live market price, blockchain address, transaction, withdrawal, or investment reward is fabricated. G remains PRE-LAUNCH with a backend-configured reference price. Custody, live market, and balance-changing transaction providers still need to be connected before real assets can move.
+
+Run with:
+
+```bash
+npm run dev
+```
+
+The development schema is in `schema.sql`; the application uses `DATABASE_URL` and serves on port 5000.

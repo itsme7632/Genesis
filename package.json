@@ -4,6 +4,11 @@
   "private": true,
   "description": "Genesis digital asset wallet and investment platform",
   "scripts": {
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "pg": "^8.23.0"
   }
 }
