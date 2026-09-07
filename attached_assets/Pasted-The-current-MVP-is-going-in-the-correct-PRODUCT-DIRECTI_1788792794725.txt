@@ -1,0 +1,677 @@
+The current MVP is going in the correct PRODUCT DIRECTION. Do NOT redesign it back into Positions, Pools, Ledger-first UX, or any of the previous concepts.
+
+The five main sections must remain:
+
+HOME
+INVEST
+WALLET
+PORTFOLIO
+MARKETS
+
+Profile remains accessible from the user's initial/avatar in the top-right.
+
+The current visual direction, Genesis G branding, mobile bottom navigation, Wallet conversion flow, Invest page, Portfolio/G-generation concept, and Markets page are the correct foundation.
+
+However, your previous report explicitly says this is currently only:
+
+"frontend MVP with a small Node static server"
+
+Now I want you to continue from the existing implementation and turn it into a properly structured functional application.
+
+DO NOT throw away the current UI.
+DO NOT redesign the product concept.
+DO NOT replace the current navigation.
+DO NOT bring back Positions/Pools.
+
+==================================================
+PHASE 1 — DATABASE + BACKEND
+==================================================
+
+Replace the demo-only data architecture with a proper persistent backend/database.
+
+Create the necessary database schema for at minimum:
+
+User
+Session
+Asset
+Wallet
+WalletBalance
+InvestmentProduct
+Investment
+GReward
+GGenerationEvent
+Conversion
+Deposit
+Withdrawal
+Transaction
+MarketPrice
+PlatformSetting
+AdminUser
+AuditLog
+
+Use proper relational relationships.
+
+Do not store financial balances only in frontend state.
+
+All important balances and financial events must originate from the backend.
+
+Use decimal-safe calculations for all financial amounts.
+
+Do not use JavaScript floating-point arithmetic for financial accounting where precision matters.
+
+Every balance-changing operation must be transactional and auditable.
+
+==================================================
+PHASE 2 — AUTHENTICATION
+==================================================
+
+Implement real Genesis authentication.
+
+Signup:
+
+- Full name
+- Username
+- Email
+- Password
+- Confirm password
+
+Login:
+
+- Email OR username
+- Password
+
+Do NOT add OTP.
+Do NOT add magic links.
+Do NOT require external authentication.
+
+Implement:
+
+- Secure password hashing
+- Server-side sessions
+- Secure cookies
+- Session expiration
+- Login/logout
+- Password change
+- Authentication middleware
+- Protected routes
+- Rate limiting where appropriate
+- Proper validation
+
+A user must not be able to access another user's wallet, investment or transaction data.
+
+==================================================
+PHASE 3 — WALLET
+==================================================
+
+Turn the current Wallet UI into a real backend-backed wallet system.
+
+Keep the current UI direction.
+
+Supported assets must be database/configuration driven.
+
+At minimum prepare support for:
+
+G
+USDT
+BNB
+BTC
+ETH
+SOL
+
+Each asset needs:
+
+- Name
+- Symbol
+- Icon
+- Decimals
+- Enabled/disabled
+- Deposit enabled
+- Withdrawal enabled
+- Investment enabled
+- Conversion enabled
+
+Wallet must display the authenticated user's actual database-backed balances.
+
+Do not use hardcoded demo balances for authenticated users.
+
+==================================================
+PHASE 4 — DEPOSIT
+==================================================
+
+Keep the existing Deposit UX, but connect it to a proper backend architecture.
+
+Create:
+
+Deposit records
+Deposit status
+Asset
+Network
+Amount
+User
+Timestamp
+Transaction/reference ID where applicable
+
+IMPORTANT:
+
+Do not invent blockchain addresses.
+
+If blockchain/custody integration is not yet connected, the system must clearly indicate that the network/address infrastructure is not configured.
+
+Architect the deposit system so a real custody/blockchain provider can be integrated later without rebuilding the Wallet UI.
+
+==================================================
+PHASE 5 — WITHDRAWAL
+==================================================
+
+Keep the current Withdrawal UI.
+
+Implement backend withdrawal records and validation.
+
+Fields should include:
+
+- User
+- Asset
+- Network
+- Destination address
+- Amount
+- Fee
+- Net amount
+- Status
+- Created timestamp
+- Processing timestamp
+- Completion timestamp
+- Blockchain transaction hash when actually available
+
+Possible statuses:
+
+PENDING
+PROCESSING
+COMPLETED
+FAILED
+CANCELLED
+
+Never display COMPLETED unless the backend actually confirms completion.
+
+==================================================
+PHASE 6 — INVESTMENT ENGINE
+==================================================
+
+The Invest page is the core earning functionality.
+
+Keep the existing Invest UI.
+
+Create configurable Investment Products.
+
+Each product should have:
+
+- Asset
+- Name
+- Minimum investment
+- Maximum investment if applicable
+- Reward rate
+- Rate unit
+- Duration/terms
+- Fee
+- Status
+- Start/end availability
+- Risk/terms description
+
+The reward rate must be controlled from Admin.
+
+Example:
+
+USDT
+Reward rate: 1.5%
+Frequency: daily
+
+Do not hardcode 1.5% into the frontend.
+
+The frontend should read the configured value from the backend.
+
+When a user invests:
+
+1. Validate balance
+2. Validate minimum/maximum
+3. Create investment
+4. Deduct/lock the appropriate amount
+5. Record transaction
+6. Start the investment according to its configured terms
+
+Do not create fake investment activity.
+
+==================================================
+PHASE 7 — GENESIS G GENERATION
+==================================================
+
+Implement the G reward system properly.
+
+G must be treated as a platform asset/token in the database.
+
+The user should have:
+
+- G balance
+- Total G generated
+- Today's G generated
+- G generation history
+- G-related transactions
+
+The Portfolio page should calculate/display the user's actual G generation from backend data.
+
+Do not make the frontend simply increment a fake number every second.
+
+If live accrual is not appropriate, calculate accrual from:
+
+Investment
+Start time
+Reward configuration
+Elapsed time
+Applicable terms
+
+and generate/account for rewards through the backend.
+
+Make reward calculation deterministic and auditable.
+
+==================================================
+PHASE 8 — PORTFOLIO
+==================================================
+
+Keep the current Portfolio / Genesis Generator visual concept.
+
+It should show:
+
+- Total invested
+- Active investments
+- G generated
+- Today's G generation
+- G balance
+- Estimated G value
+- Investment breakdown
+- G generation history
+- Investment history
+
+Do NOT rename this back to Positions.
+
+The terminology remains:
+
+Investment
+Active Investment
+G Generation
+Investment History
+
+The visual "Genesis Generator" concept is a metaphor for generating G from investments.
+
+Do not imply physical device mining.
+
+==================================================
+PHASE 9 — GENESIS G PRE-LAUNCH SYSTEM
+==================================================
+
+Create a configurable Genesis G token configuration.
+
+Fields should include:
+
+Token name
+Symbol
+Token icon
+Status
+Pre-launch reference price
+Launch date if applicable
+Live/listed status
+Description
+
+Initial status:
+
+PRE-LAUNCH
+
+Admin must be able to configure the reference price.
+
+Example:
+
+G
+Genesis
+PRE-LAUNCH
+Reference price: $0.10
+
+This reference price must be clearly identified as:
+
+REFERENCE PRICE
+
+NOT:
+
+LIVE PRICE
+
+NOT:
+
+MARKET PRICE
+
+The user-facing UI should explain that G has not launched yet and the reference price is informational/configured by Genesis.
+
+When G eventually launches, Admin should be able to change the status to LIVE/LISTED and connect/configure an actual market price source.
+
+Do not fabricate a live G price.
+
+==================================================
+PHASE 10 — CONVERSION INSIDE WALLET
+==================================================
+
+There is NO separate Swap page.
+
+Keep conversion inside Wallet.
+
+Implement backend conversion logic.
+
+Admin controls supported pairs.
+
+Examples:
+
+G → USDT
+G → BNB
+G → BTC
+G → ETH
+G → SOL
+
+When a user converts:
+
+1. Validate source balance
+2. Validate pair
+3. Obtain configured/reference rate or actual market rate depending on system status
+4. Calculate fee
+5. Calculate destination amount
+6. Deduct source asset
+7. Credit destination asset
+8. Create conversion record
+9. Create transaction records
+10. Return confirmation
+
+Everything must happen atomically.
+
+Do not claim a conversion happened if the backend did not complete it.
+
+==================================================
+PHASE 11 — MARKETS
+==================================================
+
+Keep Markets as the fifth bottom-navigation item.
+
+Prepare the backend for market data.
+
+Assets can display:
+
+- Price
+- 24h change
+- Volume if available
+- Market status
+- Mini chart where data exists
+
+Until an actual provider is integrated, clearly distinguish configured/reference/test values from live market data.
+
+For G:
+
+PRE-LAUNCH
+Reference Price
+
+After launch:
+
+LIVE
+Actual market price
+
+Never blur these two states.
+
+==================================================
+PHASE 12 — ADMIN PANEL
+==================================================
+
+The current Admin UI must become a real protected admin system.
+
+Admin access must be enforced server-side.
+
+Implement configuration for:
+
+GENESIS G
+- Name
+- Symbol
+- Icon
+- Status
+- Reference price
+- Launch information
+
+ASSETS
+- Enable/disable
+- Deposit
+- Withdrawal
+- Investment
+- Conversion
+
+INVESTMENT PRODUCTS
+- Asset
+- Rate
+- Rate frequency
+- Minimum
+- Maximum
+- Duration
+- Fees
+- Status
+- Terms
+
+CONVERSION
+- Supported pairs
+- Rates/data source
+- Fees
+- Minimum
+- Maximum
+- Enabled/disabled
+
+FEES
+
+USERS
+- View users
+- Account status
+- Wallet balances
+- Investments
+- G generation
+- Transactions
+
+TRANSACTIONS
+- Deposits
+- Withdrawals
+- Investments
+- G rewards
+- Conversions
+
+AUDIT LOGS
+
+Every important admin configuration change should be recorded.
+
+==================================================
+PHASE 13 — DEMO DATA
+==================================================
+
+Remove demo financial balances from the normal user experience.
+
+If seed data is necessary for development, clearly label it as TEST/DEMO data.
+
+Do not make demo balances appear to be real customer funds.
+
+Do not fabricate:
+
+- Deposits
+- Withdrawals
+- Investment earnings
+- G rewards
+- Blockchain hashes
+- Wallet addresses
+- Live market prices
+- Customer activity
+
+==================================================
+PHASE 14 — UI PRESERVATION
+==================================================
+
+Preserve the current visual direction unless a change is required for functionality.
+
+Keep:
+
+- Warm ivory background
+- Deep navy
+- Emerald/teal
+- Gold accents
+- Genesis G branding
+- Premium typography
+- Clean financial cards
+- Mobile-first design
+- Bottom navigation
+
+Mobile:
+
+Home | Invest | Wallet | Portfolio | Markets
+
+Desktop can use a sidebar.
+
+Profile remains top-right via user's initial/avatar.
+
+==================================================
+PHASE 15 — TESTING
+==================================================
+
+Test complete user journeys.
+
+At minimum test:
+
+NEW USER
+Signup
+Login
+Profile
+Logout
+
+WALLET
+View balance
+Open asset
+Deposit flow
+Withdrawal flow
+Transaction history
+
+INVEST
+Select asset
+Enter investment
+Validation
+Investment creation
+Balance update
+
+G GENERATION
+Investment starts
+G generation calculation
+G balance update
+Portfolio reflects generated G
+
+CONVERSION
+G → USDT
+G → BNB
+Validation
+Fees
+Balance updates
+Transaction history
+
+MARKETS
+Asset list
+G pre-launch state
+Reference price
+
+ADMIN
+Admin login
+Asset configuration
+Investment configuration
+G configuration
+Conversion configuration
+User data
+Transaction data
+Audit logs
+
+Test mobile and desktop layouts.
+
+Fix all runtime errors.
+
+==================================================
+PHASE 16 — IMPORTANT FINANCIAL SAFETY
+==================================================
+
+Do not represent investment returns as guaranteed unless the actual legal/business model supports that language and the appropriate disclosures are in place.
+
+If a reward rate such as 1.5% daily is configured, display the configured rate and applicable terms clearly.
+
+Do not use misleading phrases such as:
+
+"Guaranteed profit"
+"Risk-free"
+"Guaranteed income"
+
+The application should be transparent about:
+- Investment terms
+- Reward calculation
+- Fees
+- Risks
+- G pre-launch status
+- Reference pricing
+
+==================================================
+PHASE 17 — GIT
+==================================================
+
+When this implementation is genuinely complete:
+
+1. Run git status.
+2. Review all changed files.
+3. Run the available tests/build/type checks.
+4. Fix errors.
+5. Commit all completed work.
+6. Push to GitHub main branch.
+7. Verify the push succeeded.
+8. Report the commit hash and push status.
+
+Do NOT report completion before the Git commit and push have succeeded.
+
+==================================================
+FINAL REQUIREMENT
+==================================================
+
+The goal is NOT to make another static prototype.
+
+The goal is to evolve the existing correct Genesis MVP into a properly structured application with:
+
+REAL AUTHENTICATION
+REAL DATABASE
+REAL USER DATA
+REAL WALLET DATA MODEL
+REAL INVESTMENT RECORDS
+REAL G GENERATION ACCOUNTING
+REAL CONVERSION RECORDS
+REAL ADMIN CONFIGURATION
+REAL TRANSACTION HISTORY
+REAL SERVER-SIDE AUTHORIZATION
+
+while keeping the current Genesis visual/product direction.
+
+The final user experience must remain:
+
+HOME
+→ overview
+
+INVEST
+→ invest supported assets to generate G
+
+WALLET
+→ manage assets, deposit, withdraw, and convert G
+
+PORTFOLIO
+→ monitor investments and live/accounted G generation
+
+MARKETS
+→ view supported assets and market/reference information
+
+PROFILE
+→ top-right user initial/avatar
+
+The central Genesis loop is:
+
+DEPOSIT → INVEST → GENERATE G → HOLD OR CONVERT G → WITHDRAW
+
+Do not return to the old Positions/Pools/Ledger-first concept.
