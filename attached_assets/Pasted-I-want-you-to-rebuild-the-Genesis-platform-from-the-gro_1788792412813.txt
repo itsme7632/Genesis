@@ -1,0 +1,1332 @@
+I want you to rebuild the Genesis platform from the ground up based on the product direction below.
+
+IMPORTANT:
+Do NOT continue the previous product architecture or UX centered around:
+- Positions
+- Pools
+- "Open a position"
+- "Configured pools"
+- Internal ledger as the main product concept
+- Position cooldown
+- GENESIS weight
+- Track and claim
+- Ledger-focused wallet screens
+
+Those concepts were the wrong product direction.
+
+The new product is a MOBILE-FIRST CRYPTO WALLET + INVESTMENT PLATFORM centered around the upcoming Genesis token "G".
+
+The primary user journey is:
+
+DEPOSIT ASSET → INVEST ASSET → GENERATE G → HOLD G OR CONVERT G → WITHDRAW
+
+The platform should feel like a polished, modern crypto/fintech wallet and investment application, inspired by the quality and usability of modern crypto wallet products, but with an ORIGINAL Genesis visual identity.
+
+==================================================
+1. CORE PRODUCT CONCEPT
+==================================================
+
+Genesis is a digital asset platform where users can:
+
+1. Create an account
+2. Deposit supported crypto assets
+3. Hold supported assets in their wallet
+4. Invest supported assets through the Invest section
+5. Generate Genesis G as the investment reward
+6. Monitor their G generation in Portfolio
+7. Hold the earned G
+8. Convert G into supported assets such as USDT, BNB, BTC, ETH, etc.
+9. Withdraw supported assets
+10. Eventually interact with the real Genesis G token after its official launch/listing
+
+The main goal of the platform is to make the user experience extremely clear:
+
+"My crypto assets generate Genesis G."
+
+Do NOT make users think they are opening complicated "positions".
+
+==================================================
+2. GENESIS G TOKEN
+==================================================
+
+The platform's reward token is:
+
+Name: Genesis
+Symbol: G
+
+The G token has NOT launched yet.
+
+Before launch, Genesis G should exist inside the platform as an upcoming/pre-launch asset.
+
+Users can:
+- Earn G through supported investments
+- See their G balance
+- See how much G they have generated
+- See an estimated/reference value for G
+- Hold G
+- Convert G into supported assets if conversion is configured
+- View G transaction history
+
+IMPORTANT:
+The pre-launch G price is NOT a live market price.
+
+Admin must be able to configure a "Pre-Launch Reference Price" for G.
+
+Example:
+
+Genesis G
+Symbol: G
+Status: PRE-LAUNCH
+Reference price: $0.10
+
+The UI must clearly communicate:
+
+"Genesis G has not launched yet. The displayed pre-launch price is a reference value configured by Genesis and is not a live market price. Actual market pricing will depend on the official token launch and available markets."
+
+When the token officially launches, Admin should be able to change the token status from:
+
+PRE-LAUNCH → LIVE/LISTED
+
+and configure the appropriate live pricing/market source when an actual integration is available.
+
+NEVER fabricate:
+- live G market prices
+- fake exchange listings
+- fake blockchain transactions
+- fake wallet addresses
+- fake liquidity
+- fake users
+- fake withdrawals
+- fake deposits
+
+If a real integration is not available yet, clearly label the feature as pending/configurable rather than pretending it is live.
+
+==================================================
+3. GENESIS BRAND / LOGO
+==================================================
+
+The Genesis G mark is extremely important.
+
+The platform should use ONE consistent Genesis identity.
+
+The G token icon should also serve as the primary Genesis brand mark, with appropriate sizing/adaptations for different contexts.
+
+Do NOT create:
+- a generic crypto coin icon
+- a random hexagonal G
+- an S-shaped logo
+- an unrelated invented symbol
+- a different logo on every screen
+
+Create/use one distinctive professional Genesis G mark that works as:
+- Website logo
+- App logo
+- Favicon
+- G token icon
+- Wallet asset icon
+- Investment reward icon
+- Portfolio icon
+- Loading/branding mark
+
+The brand should feel premium, trustworthy and recognizable.
+
+The Genesis logo should be shown consistently in:
+- Public landing page
+- Login
+- Signup
+- App header
+- Wallet
+- Invest
+- Portfolio
+- Admin
+- Favicon
+
+==================================================
+4. PRIMARY MOBILE NAVIGATION
+==================================================
+
+The mobile application MUST use a bottom navigation bar.
+
+Do NOT use a desktop sidebar as the primary mobile navigation.
+
+The five primary mobile destinations are:
+
+1. HOME
+2. INVEST
+3. WALLET
+4. PORTFOLIO
+5. MARKETS
+
+The Profile page should NOT be a bottom navigation item.
+
+Instead, the authenticated header should have the user's avatar/initial at the top-right.
+
+Example:
+
+[ Genesis logo ]                         [ K ]
+
+The initial is generated from the user's first name.
+
+If the user's name is Khubab, show:
+
+K
+
+When the user taps the K avatar, open a polished profile menu/sheet containing:
+
+- Account
+- Personal information
+- Security
+- Notifications
+- Settings
+- Transactions
+- Help & Support
+- Sign out
+
+On desktop, this can be a dropdown menu.
+On mobile, it can become a full-height or large bottom sheet/page.
+
+==================================================
+5. HOME
+==================================================
+
+Home is the main dashboard.
+
+It should immediately communicate the user's financial overview.
+
+Show:
+
+- Total portfolio/wallet value
+- G balance
+- Estimated G value
+- Today's G earnings
+- Investment amount
+- Quick actions
+- Asset overview
+- Recent activity
+- G pre-launch information
+- Important platform notices
+
+Quick actions:
+
+DEPOSIT
+WITHDRAW
+INVEST
+CONVERT
+
+Do not create a separate Swap page.
+
+The Home page should be clean and data-focused.
+
+Example hierarchy:
+
+Total Balance
+$4,286.42
+
+Today's Change
++$84.20
+
+Genesis G
+2,458.72 G
+Estimated value: $245.87
+
+[ Deposit ] [ Withdraw ]
+[ Invest ] [ Convert ]
+
+Then:
+Your Assets
+Recent Activity
+Genesis Updates
+
+==================================================
+6. INVEST PAGE
+==================================================
+
+This replaces the old Pools/Positions concept.
+
+The page title should be:
+
+Invest & Generate G
+
+Supporting message:
+
+"Put your supported assets to work and generate Genesis G."
+
+Users can select supported assets such as:
+
+- USDT
+- BNB
+- BTC
+- ETH
+- SOL
+- other assets configured by Admin
+
+Each investment option should clearly explain:
+
+- Asset
+- Available balance
+- Minimum investment
+- Earning/reward rate
+- Investment duration/terms if applicable
+- Fees
+- Status
+- Estimated G generation
+- Relevant risk/terms information
+
+Example:
+
+USDT
+
+Available
+1,250 USDT
+
+Generate G
+Configured rate
+
+Minimum
+50 USDT
+
+[ Start Investing ]
+
+The rate MUST be configurable from Admin.
+
+For example, if the configured rate is 1.5% daily, display it exactly as configured, but do NOT represent it as a guaranteed return without appropriate terms/disclosures.
+
+Avoid language such as:
+"Guaranteed profit"
+"Risk-free"
+"Guaranteed daily income"
+
+The product should instead clearly communicate that investment/reward terms are configurable and subject to the applicable platform terms and risks.
+
+==================================================
+7. PORTFOLIO PAGE
+==================================================
+
+This page is extremely important.
+
+It replaces the old Positions page.
+
+The concept should be:
+
+MY INVESTMENT / GENESIS GENERATION
+
+This is where users see their active investments and how much G they are generating.
+
+Create a premium visual concept that feels like the user's assets are being converted into/generated as Genesis G.
+
+Use a subtle "Genesis Generator" / "G generation" visual metaphor.
+
+IMPORTANT:
+Do NOT claim that the user's phone/device is physically mining cryptocurrency.
+
+This is an investment reward visualization.
+
+Example:
+
+MY GENESIS PORTFOLIO
+
+Generating G
+
+2,458.72 G
+
++12.42 G today
+
+Total generated
+2,458.72 G
+
+Estimated G value
+$245.87
+
+Current configured earning rate
+1.5% daily
+
+Then show active investments:
+
+USDT → G
+
+Invested:
+500 USDT
+
+G generated:
+18.42 G
+
+Today's generation:
++1.24 G
+
+Status:
+GENERATING
+
+Another:
+
+BNB → G
+
+Invested:
+0.85 BNB
+
+G generated:
+6.82 G
+
+Today's generation:
++0.42 G
+
+Status:
+GENERATING
+
+The page should include:
+- Total invested
+- Total G generated
+- Today's G generation
+- Investment breakdown
+- Active investments
+- Completed/closed investments if applicable
+- G generation history
+- Investment history
+- Charts/visualizations where useful
+
+Do NOT call these "Positions".
+
+Use:
+- Investments
+- Active Investments
+- G Generation
+- Investment History
+
+==================================================
+8. WALLET
+==================================================
+
+The Wallet must feel like a REAL CRYPTO WALLET EXPERIENCE.
+
+Do NOT design it as:
+
+"Your internal balances"
+
+Do NOT make the wallet page primarily about an internal ledger.
+
+The wallet should show actual asset management.
+
+Supported assets can include:
+
+- Genesis G
+- USDT
+- BNB
+- BTC
+- ETH
+- SOL
+- other Admin-enabled assets
+
+Wallet home:
+
+Total Wallet Balance
+
+[ Deposit ]
+[ Withdraw ]
+
+Then asset list:
+
+Genesis
+G
+2,458.72 G
+$245.87
+
+Tether
+USDT
+1,250.00 USDT
+$1,250.00
+
+BNB
+BNB
+0.85 BNB
+$...
+
+Bitcoin
+BTC
+0.012 BTC
+$...
+
+Ethereum
+ETH
+...
+
+Solana
+SOL
+...
+
+Use accurate, recognizable crypto asset icons.
+
+Do NOT draw fake approximations of BTC, ETH, BNB, USDT or SOL.
+
+Use reliable official/recognized icon assets or a reputable crypto icon library.
+
+==================================================
+9. ASSET DETAIL
+==================================================
+
+Clicking an asset opens its detail page.
+
+Example:
+
+Genesis G
+
+2,458.72 G
+
+Estimated value
+$245.87
+
+Reference price
+$0.10
+
+Status
+PRE-LAUNCH
+
+Actions:
+
+[ Convert ]
+[ Send ]
+[ Receive ]
+
+For assets that can be invested:
+
+[ Invest ]
+
+Show transaction history below.
+
+For G specifically, show:
+
+Total Generated
+Today's Generated
+Average/Configured Reward Rate
+Reference Price
+Pre-launch status
+Generation History
+Conversion History
+
+==================================================
+10. CONVERT INSIDE WALLET
+==================================================
+
+There MUST NOT be a separate Swap navigation page.
+
+Conversion belongs inside Wallet.
+
+For example:
+
+Convert Genesis G
+
+FROM
+Genesis G
+500 G
+
+TO
+USDT
+
+Estimated receive:
+$50.00 USDT
+
+Show:
+- Conversion/reference rate
+- Fee
+- Minimum
+- Estimated amount
+- Confirmation
+
+Supported conversion pairs must come from Admin configuration.
+
+Examples:
+
+G → USDT
+G → BNB
+G → BTC
+G → ETH
+G → SOL
+
+Do not show unsupported pairs.
+
+If conversion is not actually configured or connected, clearly show that it is unavailable rather than pretending a transaction occurred.
+
+==================================================
+11. DEPOSIT
+==================================================
+
+Create a proper deposit flow.
+
+The user selects:
+
+Asset
+Network
+
+Then show the appropriate deposit information ONLY if a real wallet/address integration exists.
+
+Possible UI:
+
+Deposit USDT
+
+Network:
+TRC20 / ERC20 / etc. depending on actual supported configuration
+
+Wallet address:
+[ actual address when integrated ]
+
+QR code:
+[ actual QR when integrated ]
+
+Warning:
+Only send supported assets through the selected network.
+
+If no real blockchain wallet integration exists yet, create the correct UI architecture but use an explicit test/configuration state.
+
+NEVER invent real deposit addresses.
+
+==================================================
+12. WITHDRAW
+==================================================
+
+Create a proper withdrawal flow.
+
+User selects:
+
+Asset
+Network
+Destination address
+Amount
+
+Show:
+
+Available balance
+Network fee
+Platform fee if configured
+You receive
+Confirmation
+
+Then require confirmation before submission.
+
+Never claim a blockchain withdrawal succeeded unless the actual backend/integration confirms it.
+
+==================================================
+13. MARKETS
+==================================================
+
+Markets is the fifth bottom-navigation item.
+
+It should display supported market assets and market information when real market data is available.
+
+Examples:
+
+BTC
+ETH
+BNB
+SOL
+USDT
+G
+
+For each:
+
+Name
+Symbol
+Price
+24h change
+Optional mini chart
+
+G before launch should display:
+
+Genesis
+G
+
+PRE-LAUNCH
+
+Reference price:
+$0.10
+
+Do NOT call the reference price a live market price.
+
+When G officially launches and a real market data source is configured, the Markets page can display actual live pricing.
+
+==================================================
+14. CRYPTO ASSET ICONS
+==================================================
+
+This is extremely important.
+
+Use accurate recognizable crypto logos.
+
+Required examples:
+
+Bitcoin → recognizable BTC logo
+Ethereum → recognizable ETH logo
+BNB → recognizable BNB logo
+USDT → recognizable Tether logo
+Solana → recognizable SOL logo
+Genesis → official Genesis G mark
+
+Do not manually draw crude SVG approximations.
+
+Use a reliable icon package/local asset system and keep icons consistent in size and visual treatment.
+
+==================================================
+15. AUTHENTICATION
+==================================================
+
+Use Genesis's own authentication.
+
+Signup:
+
+- Full name
+- Username
+- Email
+- Password
+- Confirm password
+
+Include:
+- Username availability
+- Email validation
+- Password strength
+- Password visibility toggle
+- Clean inline validation
+
+Login:
+
+Allow:
+
+Email OR Username + Password
+
+Do NOT introduce an OTP login flow.
+
+Do NOT require magic links.
+
+Do NOT require external Google/Apple authentication unless specifically added later.
+
+Use secure:
+- Password hashing
+- Server-side sessions
+- Secure cookies
+- Proper session expiration
+- CSRF protection where applicable
+- Rate limiting
+- Secure validation
+
+==================================================
+16. PROFILE
+==================================================
+
+The profile menu is accessed through the top-right initial avatar.
+
+Profile should include:
+
+- Full name
+- Username
+- Email
+- Profile avatar/initial
+- Member since
+- Security
+- Password change
+- Notifications
+- Settings
+- Transaction history
+- Help/support
+- Sign out
+
+Keep it clean and professional.
+
+==================================================
+17. ADMIN PANEL
+==================================================
+
+Build a proper protected Admin area.
+
+Admin should be able to configure:
+
+ASSETS
+- Enable/disable supported assets
+- Asset name
+- Symbol
+- Icon
+- Network information
+- Deposit availability
+- Withdrawal availability
+- Investment availability
+
+GENESIS G
+- Token name
+- Symbol
+- Token icon
+- Pre-launch/live status
+- Pre-launch reference price
+- Launch status
+- Conversion availability
+- Supported conversion pairs
+- Description
+
+INVESTMENTS
+- Supported investment assets
+- Minimum investment
+- Reward/earning rate
+- Duration/terms
+- Fees
+- Start/end availability
+- Status
+- Applicable disclosures
+
+CONVERSIONS
+- Supported pairs
+- Reference/market rate source
+- Fees
+- Minimum amounts
+- Maximum amounts
+- Enable/disable
+
+FEES
+- Deposit fees where applicable
+- Withdrawal fees
+- Conversion fees
+- Investment fees
+
+USERS
+- View users
+- Account status
+- Investment history
+- Wallet activity
+- G balances
+- G generation history
+
+TRANSACTIONS
+- Deposits
+- Withdrawals
+- Conversions
+- Investments
+- G rewards
+
+PLATFORM SETTINGS
+- Branding
+- Announcements
+- Feature flags
+- Maintenance mode
+- Terms/disclosures
+
+AUDIT LOGS
+- Admin actions
+- Configuration changes
+- Important account changes
+
+Admin authorization MUST be enforced server-side.
+
+Do not rely only on hiding admin UI elements.
+
+==================================================
+18. DATA / BACKEND ARCHITECTURE
+==================================================
+
+Build a proper backend architecture.
+
+Recommended entities include:
+
+User
+Session
+Asset
+Wallet
+WalletBalance
+InvestmentProduct
+Investment
+GReward
+GGenerationEvent
+Conversion
+Deposit
+Withdrawal
+Transaction
+MarketPrice
+PlatformSetting
+AdminUser
+AuditLog
+
+Use a clean relational data model.
+
+Do not hardcode financial balances into frontend components.
+
+All balances should come from backend data.
+
+Use decimal-safe financial calculations.
+
+Do NOT use floating-point arithmetic for financial balances where precision matters.
+
+All important financial operations must be transactional and auditable.
+
+==================================================
+19. FINANCIAL DATA RULES
+==================================================
+
+Never fabricate financial activity.
+
+Do not create fake:
+- deposits
+- withdrawals
+- G rewards
+- investment profits
+- market prices
+- wallet addresses
+- blockchain transaction hashes
+- users
+- testimonials
+- transaction histories
+
+For development/testing, clearly label seed/test data as test data.
+
+The frontend should never imply that a real blockchain transaction occurred unless confirmed by the backend/integration.
+
+==================================================
+20. RESPONSIVE DESIGN
+==================================================
+
+MOBILE FIRST.
+
+The application must look excellent on:
+
+- Android phones
+- iPhones
+- Small screens
+- Large phones
+- Tablets
+- Desktop
+
+Mobile:
+Use bottom navigation:
+
+Home
+Invest
+Wallet
+Portfolio
+Markets
+
+Top-right:
+User initial/avatar
+
+Desktop:
+A left sidebar can be used.
+
+Desktop navigation:
+
+Home
+Invest
+Wallet
+Portfolio
+Markets
+
+Profile/avatar remains top-right.
+
+Do not simply shrink the desktop UI for mobile.
+
+Design mobile layouts intentionally.
+
+==================================================
+21. VISUAL DESIGN
+==================================================
+
+Create a premium crypto-fintech visual identity.
+
+Primary visual direction:
+
+- Warm ivory/off-white background
+- Deep navy/charcoal
+- Emerald/teal
+- Subtle gold accents
+- Very light borders
+- Soft shadows
+- Elegant typography
+- Generous whitespace
+- Moderate corner radius
+- Premium cards
+- Clean financial data visualization
+
+Suggested palette:
+
+Background:
+#F7F5EF
+
+Dark:
+#101C24
+
+Genesis Green:
+#187C68
+
+Gold:
+#D4A83F
+
+Primary Text:
+#172027
+
+Secondary Text:
+#737A7D
+
+Border:
+#E5E2DA
+
+Do NOT use:
+- Loud neon crypto colors
+- Excessive gradients
+- Excessive glassmorphism
+- Huge glowing effects
+- Generic Web3 sci-fi design
+- Excessive pill-shaped UI
+- Random colors
+
+The product should feel like a serious premium financial platform.
+
+==================================================
+22. TYPOGRAPHY
+==================================================
+
+Use an elegant display/serif style for major headings where appropriate.
+
+Use a highly readable modern sans-serif for:
+
+- Balances
+- Buttons
+- Tables
+- Navigation
+- Forms
+- Financial information
+
+The financial numbers must always be extremely readable.
+
+==================================================
+23. GENESIS "G GENERATOR" VISUAL
+==================================================
+
+Create a distinctive visual language around G generation.
+
+The Portfolio page should feel different from a normal crypto portfolio.
+
+Think:
+
+Asset
+↓
+Genesis Generation
+↓
+G
+
+Use subtle animated particles, progress flows, energy lines, or a generator-style visual if appropriate.
+
+Keep it elegant.
+
+Do NOT make it look like a game.
+
+Do NOT claim physical mining.
+
+The visual metaphor is:
+
+"Your invested assets are generating Genesis G."
+
+==================================================
+24. LANDING PAGE
+==================================================
+
+Create a premium public Genesis landing page.
+
+Hero:
+
+Genesis branding
+
+Headline should communicate the concept:
+
+"Put your assets to work. Generate Genesis G."
+
+Supporting message explaining:
+- Digital asset wallet
+- Investment
+- Genesis G
+- Upcoming token launch
+
+Primary CTA:
+Open an Account
+
+Secondary CTA:
+Explore Genesis
+
+Include sections for:
+
+- Wallet
+- Invest
+- Generate G
+- Genesis G
+- How it works
+- Supported assets
+- Security
+- Pre-launch token information
+- Transparent terms
+- FAQ
+
+Do NOT use the previous "Pair your assets. Build a position." concept.
+
+Do NOT use "positions" as the main marketing language.
+
+==================================================
+25. UI COMPONENTS
+==================================================
+
+Create a reusable design system.
+
+Components should include:
+
+- Header
+- Bottom navigation
+- Desktop sidebar
+- Avatar
+- Asset card
+- Balance card
+- Investment card
+- G generation card
+- Transaction row
+- Market row
+- Token icon
+- Quick action buttons
+- Modal
+- Bottom sheet
+- Dropdown
+- Tabs
+- Charts
+- Progress indicators
+- Toasts
+- Confirmation dialogs
+- Form inputs
+- Empty states
+- Loading states
+- Error states
+
+Keep the entire product visually consistent.
+
+==================================================
+26. INTERACTION QUALITY
+==================================================
+
+Add polished micro-interactions:
+
+- Button feedback
+- Smooth navigation
+- Card hover states on desktop
+- Bottom sheet transitions
+- Number transitions where appropriate
+- Loading skeletons
+- Success/error states
+- Confirmation animations
+- Subtle G-generation animation
+
+Do not over-animate.
+
+The application must still feel like a professional financial platform.
+
+==================================================
+27. EMPTY / DISABLED STATES
+==================================================
+
+Never show broken screens.
+
+If something isn't configured yet, explain it professionally.
+
+Example:
+
+Genesis G
+
+PRE-LAUNCH
+
+"Genesis G is preparing for launch. The reference price shown here is configured for informational purposes and is not a live market price."
+
+For unavailable conversions:
+
+"Conversion for this pair is not currently available."
+
+For unavailable blockchain deposits:
+
+"Wallet infrastructure for this network has not been enabled yet."
+
+Do not show fake data to make a feature appear operational.
+
+==================================================
+28. SECURITY
+==================================================
+
+Implement proper application security:
+
+- Password hashing
+- Secure sessions
+- Server-side authorization
+- Input validation
+- Rate limiting
+- CSRF protection where appropriate
+- Secure cookies
+- Admin authorization
+- Audit logs
+- Transaction integrity
+- Decimal-safe calculations
+- No secrets in frontend
+- No private keys in frontend
+- No sensitive credentials committed to Git
+
+==================================================
+29. IMPORTANT PRODUCT LANGUAGE
+==================================================
+
+Use:
+
+Invest
+Investment
+Generate G
+G Generation
+Genesis G
+Wallet
+Assets
+Portfolio
+Markets
+Convert
+Deposit
+Withdraw
+Transaction
+Reference Price
+Pre-Launch
+Live/Listed
+
+Avoid using as primary UX concepts:
+
+Position
+Pool
+Open a Position
+Internal Ledger
+Ledger Entry
+Configured Pool
+GENESIS Weight
+Position Cooldown
+
+If an accounting ledger exists technically in the backend, that is fine.
+
+But users should experience Genesis as a:
+
+CRYPTO WALLET + INVESTMENT + GENESIS G ECOSYSTEM
+
+not as an internal ledger application.
+
+==================================================
+30. BUILD QUALITY
+==================================================
+
+Do not just create static mock screens.
+
+Build the actual application architecture.
+
+All major buttons should have a real route/action.
+
+Forms should validate.
+
+Navigation should work.
+
+Data should be structured for backend integration.
+
+The UI must be responsive.
+
+The wallet should be architected so real blockchain/custody providers can be integrated later without rewriting the frontend.
+
+Investment calculations must be backend-controlled.
+
+G generation must be backend-controlled.
+
+Admin configuration must flow into the user application.
+
+==================================================
+31. DO NOT REUSE THE OLD WRONG UX
+==================================================
+
+This instruction is extremely important.
+
+If the existing project contains:
+
+Positions
+Pools
+Ledger-first wallet
+Open Position
+Position cooldown
+GENESIS weight
+Track and claim
+
+DO NOT simply rename those screens.
+
+Re-architect them into:
+
+Invest
+Wallet
+Portfolio
+G Generation
+Markets
+
+The result should feel like a completely redesigned product.
+
+==================================================
+32. BEFORE REPORTING COMPLETE
+==================================================
+
+Test the application thoroughly.
+
+Check:
+
+- Signup
+- Login
+- Logout
+- Profile menu
+- Mobile bottom navigation
+- Desktop navigation
+- Home
+- Invest
+- Portfolio
+- Wallet
+- Asset details
+- Deposit flow
+- Withdrawal flow
+- G balance
+- G generation
+- Convert flow
+- Markets
+- Admin
+- Responsive layouts
+- Empty states
+- Error states
+- Loading states
+- Authorization
+- Financial calculations
+
+Fix all obvious errors and broken routes.
+
+Do not report the task complete while major pages are placeholders or navigation is broken.
+
+==================================================
+33. GIT REQUIREMENT
+==================================================
+
+After completing the implementation and testing:
+
+1. Check git status.
+2. Review all changes.
+3. Commit all completed work with a clear commit message.
+4. Push the commit to the GitHub MAIN branch.
+5. Verify that the push succeeded.
+6. Only then report the task as complete.
+
+Do not forget the Git commit and push.
+
+==================================================
+FINAL PRODUCT GOAL
+==================================================
+
+The finished Genesis platform should feel like:
+
+A premium modern crypto wallet where users can deposit and manage digital assets, invest those assets to generate Genesis G, monitor their G generation through Portfolio, hold or convert G, and eventually participate in the Genesis token ecosystem when G officially launches.
+
+The five primary mobile sections are:
+
+HOME
+INVEST
+WALLET
+PORTFOLIO
+MARKETS
+
+Profile is accessed through the user's initial/avatar in the top-right.
+
+The central product loop is:
+
+DEPOSIT → INVEST → GENERATE G → HOLD / CONVERT → WITHDRAW
+
+Build the product around that idea from the ground up.
