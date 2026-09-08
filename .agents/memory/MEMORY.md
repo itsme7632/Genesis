@@ -1,0 +1,1 @@
+- [Modal composition](frontend-modal-composition.md) — keep complex vanilla-JS modal markup in named sections instead of deeply nested template literals.

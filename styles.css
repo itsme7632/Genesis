@@ -172,14 +172,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .mini-chart svg { width:70px; height:26px; }
 .form-stack { display:grid; gap:14px; }
 .form-field label { font-size: 11px; font-weight:700; display:block; margin-bottom:7px; }
-.form-field input, .form-field select { width:100%; border:1px solid var(--line); background:#fffefa; border-radius:9px; padding:12px; color:var(--ink); }
-.form-field input:focus, .form-field select:focus { border-color:var(--green); outline:0; box-shadow: 0 0 0 3px rgba(24,124,104,.1); }
+.form-field input, .form-field select, .form-field textarea { width:100%; border:1px solid var(--line); background:#fffefa; border-radius:9px; padding:12px; color:var(--ink); }
+.form-field textarea { min-height:74px; resize:vertical; line-height:1.5; }
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--green); outline:0; box-shadow: 0 0 0 3px rgba(24,124,104,.1); }
 .input-note { display:flex; justify-content:space-between; color:var(--muted); font-size:10px; margin-top:5px; }
 .admin-shell { display:grid; grid-template-columns: 190px 1fr; gap: 20px; }
 .admin-tabs { display:grid; align-content:start; gap:4px; }
 .admin-tab { padding:11px 12px; border:0; background:transparent; text-align:left; border-radius:9px; color:var(--muted); }
 .admin-tab.active, .admin-tab:hover { background:var(--paper); color:var(--green); font-weight:700; }
 .admin-panel { padding:22px; }
+.admin-products { display:grid; gap:14px; margin-top:18px; }
+.admin-product-form { border:1px solid var(--line); border-radius:14px; padding:17px; background:#fffefa; }
+.admin-product-form + .admin-product-form { margin-top:0; }
+.admin-product-form .setting-line { margin-top:14px; padding-top:14px; }
+.admin-product-form > .btn { margin-top:15px; }
+.admin-assets { display:grid; gap:0; }
+.asset-switches { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:9px 13px; }
+.asset-switches label { display:inline-flex; align-items:center; gap:5px; color:var(--muted); font-size:11px; white-space:nowrap; }
+.asset-switches input { accent-color:var(--green); }
 .setting-line { display:flex; gap:14px; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--line); }
 .setting-line:last-child { border:0; }
 .setting-line strong { display:block; font-size:13px; }
