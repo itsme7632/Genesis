@@ -1,0 +1,1100 @@
+GENESIS — PHASE 2: BUILD THE REAL INVESTMENT + GENESIS G GENERATION ENGINE
+
+The current Genesis project has now reached the correct foundation:
+
+- PostgreSQL database is connected
+- Authentication/session system exists
+- Wallet and portfolio are backend-backed
+- Five-section product structure is established
+- Genesis G is PRE-LAUNCH
+- Admin configuration exists
+- Current UI/visual direction is correct
+- The latest changes have already been manually pushed to GitHub main
+
+Now build the next major functional layer:
+
+INVESTMENT ENGINE + GENESIS G GENERATION ENGINE
+
+IMPORTANT:
+Do NOT redesign the application.
+Do NOT change the five-section navigation.
+Do NOT bring back Positions or Pools.
+Do NOT create a separate Swap page.
+Do NOT replace the current Genesis G visual identity.
+
+Keep the current UI and improve/connect it to real backend functionality.
+
+==================================================
+1. CORE USER FLOW
+==================================================
+
+The core flow must now become functional:
+
+WALLET
+↓
+USER SELECTS AN ASSET
+↓
+INVEST
+↓
+INVESTMENT CREATED
+↓
+G GENERATION ACCRUES ACCORDING TO CONFIGURED TERMS
+↓
+PORTFOLIO SHOWS ACCRUED G
+↓
+G BALANCE INCREASES WHEN REWARD IS ACCOUNTED
+↓
+USER CAN HOLD G
+OR
+CONVERT G INTO A SUPPORTED ASSET
+↓
+DESTINATION ASSET APPEARS IN WALLET
+↓
+USER CAN WITHDRAW WHEN WITHDRAWAL IS ACTUALLY AVAILABLE
+
+The system must use backend/database state for all financial calculations.
+
+The frontend must never simulate earnings by simply increasing a number with JavaScript.
+
+==================================================
+2. INVESTMENT PRODUCTS
+==================================================
+
+Use the existing InvestmentProduct database model.
+
+Make Investment Products fully configurable by Admin.
+
+Each investment product should support at minimum:
+
+- id
+- name
+- assetId
+- symbol
+- enabled
+- minimumAmount
+- maximumAmount
+- rewardRate
+- rewardRateUnit
+- rewardFrequency
+- duration
+- fee
+- terms
+- riskDisclosure
+- createdAt
+- updatedAt
+
+Do not hardcode investment products into React/frontend code.
+
+The Invest page must retrieve enabled products from the backend.
+
+Example:
+
+USDT
+
+Generate Genesis G
+
+Reward rate:
+1.5% daily
+
+Minimum:
+50 USDT
+
+[ Start Investing ]
+
+The exact rate must come from the database/Admin configuration.
+
+==================================================
+3. RATE CONFIGURATION
+==================================================
+
+The reward rate must be completely configurable.
+
+Example configuration:
+
+rewardRate = 1.5
+rewardRateUnit = percent
+rewardFrequency = daily
+
+Do NOT hardcode "1.5%" anywhere in the frontend logic.
+
+Admin should be able to change:
+
+1.0%
+1.5%
+2.0%
+
+or another configured rate without changing source code.
+
+The UI should automatically reflect the configured value.
+
+IMPORTANT FINANCIAL RULE:
+
+Do not describe the rate as a guaranteed return.
+
+Use language such as:
+
+"Configured G generation rate"
+
+or:
+
+"Current reward rate"
+
+and make the applicable investment terms/risk information available.
+
+==================================================
+4. INVESTMENT CREATION
+==================================================
+
+When a user clicks:
+
+START INVESTING
+
+show a proper investment form.
+
+Example:
+
+Invest USDT
+
+Available:
+1,250.00 USDT
+
+Amount:
+[ 500.00 ]
+
+Current G generation rate:
+1.5% daily
+
+Estimated G generation:
+[ calculated estimate ]
+
+Investment terms:
+[ configured terms ]
+
+Risk/terms disclosure:
+[ configured text ]
+
+[ Review Investment ]
+
+Then show a confirmation screen.
+
+Example:
+
+Confirm Investment
+
+Asset:
+USDT
+
+Amount:
+500 USDT
+
+Reward rate:
+1.5% daily
+
+Estimated reward:
+...
+
+Terms:
+...
+
+[ Confirm Investment ]
+
+==================================================
+5. VALIDATION
+==================================================
+
+Before creating an investment:
+
+- User must be authenticated
+- Asset must be enabled
+- Investment product must be enabled
+- User must have sufficient available balance
+- Amount must be >= minimum
+- Amount must be <= maximum when maximum exists
+- Amount must have valid decimal precision
+- Investment must satisfy all configured terms
+
+Do not allow negative values.
+
+Do not allow zero values.
+
+Do not trust frontend validation alone.
+
+Repeat all important validation server-side.
+
+==================================================
+6. BALANCE HANDLING
+==================================================
+
+When an investment is created:
+
+Use a database transaction.
+
+Validate the user's available wallet balance.
+
+Then:
+
+1. Lock/deduct the investment amount according to the configured investment model.
+2. Create the Investment record.
+3. Create the corresponding Transaction record.
+4. Record the event in an auditable way.
+5. Commit everything atomically.
+
+If any operation fails:
+
+ROLL BACK EVERYTHING.
+
+Never create an investment without the corresponding balance change.
+
+Never deduct balance without creating the corresponding investment/transaction.
+
+==================================================
+7. INVESTMENT STATUS
+==================================================
+
+Use clear investment statuses.
+
+For example:
+
+ACTIVE
+COMPLETED
+CANCELLED
+PENDING
+
+Do NOT call them "Positions".
+
+The user-facing terminology must remain:
+
+Investment
+Active Investment
+Investment History
+G Generation
+
+If the configured product has a fixed duration, automatically determine when it completes.
+
+If there is no duration, treat it according to the configured product rules.
+
+Do not invent rules that aren't configured.
+
+==================================================
+8. G GENERATION ENGINE
+==================================================
+
+This is the most important part of this phase.
+
+G generation must be backend-controlled.
+
+The system must NOT have:
+
+setInterval()
+setTimeout()
+frontend counters
+fake animated earnings
+random reward numbers
+
+as the actual financial accounting mechanism.
+
+The Portfolio animation may visually update, but the financial value must come from backend calculations.
+
+The system needs to calculate the G generated by each active investment based on:
+
+- Investment amount
+- Reward rate
+- Reward frequency
+- Investment start time
+- Current time
+- Applicable terms
+- Any configured caps/limits if implemented
+
+Create auditable G generation events.
+
+Use the existing GReward and GGenerationEvent models.
+
+==================================================
+9. EXAMPLE G CALCULATION
+==================================================
+
+For a simple daily percentage reward model:
+
+Investment amount:
+500 USDT
+
+Configured reward rate:
+1.5% daily
+
+Daily reward value:
+500 × 0.015 = 7.50 USDT-equivalent reward value per day
+
+The actual number of G credited must be determined from the configured G valuation/reference price or reward conversion rules.
+
+For example, if the current configured G reference price is:
+
+$0.10 per G
+
+then:
+
+$7.50 reward value ÷ $0.10 = 75 G
+
+IMPORTANT:
+
+Do not assume this exact conversion model is permanently correct.
+
+Build the system so Admin can control/configure the reward methodology.
+
+At minimum, separate:
+
+1. Investment reward value calculation
+2. Conversion of reward value into G
+
+This is important because G will eventually have a real market price after launch.
+
+==================================================
+10. PRE-LAUNCH G PRICING
+==================================================
+
+G currently has:
+
+STATUS = PRE-LAUNCH
+
+Admin can configure:
+
+Pre-launch reference price
+
+Example:
+
+$0.10
+
+This value is informational/reference data.
+
+Before launch, the system may use the configured reference price for calculating/displaying estimated G reward amounts ONLY according to the configured reward model.
+
+The UI must clearly distinguish:
+
+REFERENCE PRICE
+
+from:
+
+LIVE MARKET PRICE
+
+Never call the pre-launch value a live market price.
+
+When G launches, the architecture must allow the system to transition to an actual market price provider.
+
+Do not build fake live pricing.
+
+==================================================
+11. G REWARD ACCOUNTING
+==================================================
+
+G rewards must be persistent.
+
+Each reward event should contain enough information to audit the calculation.
+
+For example:
+
+- userId
+- investmentId
+- reward asset
+- reward amount
+- reward value
+- G price used
+- G amount credited
+- calculation period
+- createdAt
+- source
+- status
+
+Do not create duplicate rewards if the same calculation period is processed twice.
+
+Reward generation must be idempotent.
+
+If the reward engine runs again for an already-accounted period, it must not double-credit the user.
+
+==================================================
+12. HOW REWARDS SHOULD BE ACCRUED
+==================================================
+
+Build a backend reward-accrual service.
+
+The preferred architecture is:
+
+CALCULATE FROM ELAPSED TIME
+
+rather than requiring the server to execute a reward event every second.
+
+For example:
+
+Investment started:
+September 7 at 10:00
+
+Current time:
+September 8 at 10:00
+
+Elapsed:
+24 hours
+
+Calculate the amount earned based on the configured daily rate.
+
+When the user opens Portfolio, the backend can calculate/account for the accrued reward.
+
+Also prepare the architecture for a scheduled/background reward processor later.
+
+The important requirement:
+
+The balance must be derived from authoritative backend calculations.
+
+==================================================
+13. FRACTIONAL REWARDS
+==================================================
+
+G will need decimal precision.
+
+Use a safe decimal/numeric database type.
+
+Do not use JavaScript Number for authoritative financial calculations.
+
+Use the database decimal/numeric types and a proper decimal arithmetic approach.
+
+Define appropriate precision and scale for:
+
+- Asset balances
+- Investment amounts
+- G balances
+- Reward amounts
+- Prices
+- Fees
+
+==================================================
+14. PORTFOLIO PAGE
+==================================================
+
+Now connect the existing Portfolio page to the actual backend investment/reward engine.
+
+The Portfolio page should show real authenticated-user data.
+
+Top section:
+
+MY GENESIS PORTFOLIO
+
+Generating G
+
+[actual G balance / generated amount]
+
+Today's G generation
+
+[actual backend-calculated amount]
+
+Total invested
+
+[actual backend amount]
+
+Estimated G value
+
+[actual G balance × configured reference/live price]
+
+Then active investment cards.
+
+Example:
+
+USDT → G
+
+Invested:
+500 USDT
+
+Generated:
+75.00 G
+
+Today's generation:
++75.00 G
+
+Status:
+GENERATING
+
+Do NOT use fake/demo numbers.
+
+If the user has no investments:
+
+show a clean empty state:
+
+"No active investments"
+
+"Invest supported assets to start generating Genesis G."
+
+[ Start Investing ]
+
+==================================================
+15. G GENERATOR VISUAL
+==================================================
+
+Keep the existing Genesis Generator visual concept.
+
+The visual should communicate:
+
+YOUR ASSET
+↓
+GENESIS GENERATION
+↓
+G
+
+It can include subtle animation.
+
+But the animation must NEVER be responsible for calculating the reward.
+
+Animation = visual only.
+
+Backend calculation = financial truth.
+
+Do not imply physical mining.
+
+==================================================
+16. INVESTMENT HISTORY
+==================================================
+
+Add a proper history section.
+
+Show:
+
+- Asset
+- Amount invested
+- Start date
+- Status
+- G generated
+- Reward rate
+- End date if applicable
+
+Allow the user to open an investment detail view.
+
+Investment detail should show:
+
+Investment amount
+Asset
+Start date
+Current status
+Reward rate
+G generated
+Reward history
+Terms
+Applicable fees
+End date if applicable
+
+==================================================
+17. G GENERATION HISTORY
+==================================================
+
+Create a history view for G generation.
+
+Each entry can show:
+
+Date
+Investment
+Reward value
+G price used
+G generated
+
+Example:
+
+Sep 7
+USDT Investment
+Reward value: $7.50
+G reference price: $0.10
+Generated: 75 G
+
+Again, these numbers must come from the backend.
+
+==================================================
+18. WALLET INTEGRATION
+==================================================
+
+After an investment is created:
+
+The Wallet must reflect the reduced available balance according to the investment model.
+
+Example:
+
+Before:
+
+USDT
+1,000
+
+Invest:
+
+500 USDT
+
+After:
+
+Available USDT
+500
+
+Invested USDT
+500
+
+Do not simply overwrite the wallet balance without recording why.
+
+The system should distinguish between:
+
+Available balance
+Invested balance
+
+where appropriate.
+
+For G:
+
+G balance should reflect actual credited/accounted G.
+
+==================================================
+19. G ASSET DETAIL
+==================================================
+
+The G asset detail inside Wallet should now be connected to real backend data.
+
+Show:
+
+Genesis
+G
+
+Balance:
+[actual G balance]
+
+Estimated value:
+[actual balance × configured reference/live price]
+
+Status:
+PRE-LAUNCH
+
+Total generated:
+[actual]
+
+Today's generated:
+[actual]
+
+Then:
+
+[ Convert ]
+
+If G is eligible for conversion.
+
+Do not show a fake live price.
+
+==================================================
+20. CONVERSION PREPARATION
+==================================================
+
+Do not create a separate Swap page.
+
+Keep conversion inside Wallet.
+
+The current conversion UI should now consume backend configuration.
+
+Admin-controlled conversion pairs:
+
+G → USDT
+G → BNB
+G → BTC
+G → ETH
+G → SOL
+
+Only show enabled pairs.
+
+If conversion isn't configured:
+
+show:
+
+"Conversion is currently unavailable."
+
+Do not simulate the conversion.
+
+The full conversion transaction engine can be completed in the next phase if necessary, but prepare the backend interfaces correctly now.
+
+==================================================
+21. ADMIN INVESTMENT CONTROLS
+==================================================
+
+Make sure Admin can actually configure the investment engine.
+
+Admin must be able to:
+
+Create investment product
+Edit investment product
+Enable/disable product
+Set supported asset
+Set minimum
+Set maximum
+Set reward rate
+Set reward frequency
+Set duration
+Set fees
+Set terms
+Set risk disclosure
+
+Example:
+
+USDT
+Enabled
+Reward: 1.5%
+Frequency: Daily
+Minimum: 50 USDT
+Maximum: 10,000 USDT
+
+The user Invest page should immediately use the saved configuration.
+
+==================================================
+22. ADMIN G CONTROLS
+==================================================
+
+Admin must be able to configure:
+
+Token name:
+Genesis
+
+Symbol:
+G
+
+Status:
+PRE-LAUNCH
+
+Reference price:
+$0.10
+
+When G launches, Admin should eventually be able to set:
+
+LIVE/LISTED
+
+and configure the live market price source.
+
+Do not allow frontend users to modify these settings.
+
+==================================================
+23. AUDITABILITY
+==================================================
+
+Every important financial event should be traceable.
+
+At minimum:
+
+Investment created
+Investment updated
+Investment completed
+Reward generated
+G credited
+Conversion initiated
+Conversion completed
+Withdrawal initiated
+etc.
+
+Include:
+
+timestamp
+user
+source
+amount
+asset
+related record IDs
+
+Use AuditLog where appropriate.
+
+==================================================
+24. API DESIGN
+==================================================
+
+Keep financial operations server-side.
+
+Create clean authenticated API routes for things such as:
+
+GET /api/investments
+POST /api/investments
+GET /api/investments/:id
+GET /api/portfolio
+GET /api/g-rewards
+GET /api/g-generation
+GET /api/wallet
+GET /api/assets
+
+Use the project's existing architecture/conventions if different route naming is already established.
+
+Do not create duplicate competing API systems.
+
+==================================================
+25. ERROR HANDLING
+==================================================
+
+Handle:
+
+Insufficient balance
+Investment below minimum
+Investment above maximum
+Disabled product
+Disabled asset
+Invalid amount
+Expired product
+Unauthorized request
+Missing configuration
+Database failure
+Duplicate reward calculation
+
+Show clean user-facing messages.
+
+Never expose database errors or stack traces to users.
+
+==================================================
+26. DEMO DATA
+==================================================
+
+Do not create fake financial activity for normal users.
+
+New users should start with:
+
+0 asset balances
+0 G balance
+0 investments
+0 rewards
+
+If test/seed data is required for development, clearly mark it as TEST/DEMO data and keep it separate from normal production behavior.
+
+==================================================
+27. TESTING
+==================================================
+
+Create and run tests for the financial engine.
+
+At minimum test:
+
+1. Create user
+2. Give test user a controlled test balance
+3. Create investment
+4. Verify balance deduction/locking
+5. Verify investment record
+6. Calculate G reward
+7. Verify reward event
+8. Verify G balance
+9. Run reward calculation again for same period
+10. Confirm NO duplicate reward
+11. Verify Portfolio
+12. Verify Wallet
+13. Verify investment history
+14. Verify G generation history
+15. Test insufficient balance
+16. Test minimum amount
+17. Test maximum amount
+18. Test disabled investment product
+19. Test disabled asset
+20. Test unauthorized access
+
+Do not leave test financial records mixed into normal demo/customer data.
+
+==================================================
+28. SECURITY TESTING
+==================================================
+
+Verify:
+
+A user cannot access another user's investment.
+
+A user cannot modify another user's balance.
+
+A user cannot create an investment for another user.
+
+A user cannot manually submit a reward amount and have the server trust it.
+
+A user cannot modify the investment rate from the frontend.
+
+A user cannot modify the G reference price.
+
+A normal user cannot access Admin APIs.
+
+All financial values must be server-authoritative.
+
+==================================================
+29. UI RULES
+==================================================
+
+Preserve the existing visual system.
+
+Do not redesign the whole app.
+
+Keep:
+
+HOME
+INVEST
+WALLET
+PORTFOLIO
+MARKETS
+
+Mobile bottom navigation stays exactly:
+
+Home | Invest | Wallet | Portfolio | Markets
+
+Profile remains the top-right initial/avatar.
+
+Keep the Genesis G branding.
+
+Keep the premium:
+
+Ivory
+Deep Navy
+Emerald/Teal
+Gold
+
+visual system.
+
+==================================================
+30. IMPORTANT TERMINOLOGY
+==================================================
+
+Use:
+
+Invest
+Investment
+Generate G
+G Generation
+Genesis G
+Portfolio
+Wallet
+Assets
+Markets
+Convert
+Deposit
+Withdraw
+Investment History
+G Generation History
+
+Do NOT use:
+
+Position
+Positions
+Pool
+Pools
+Open a Position
+Position Cooldown
+GENESIS Weight
+Ledger Entry
+
+The technical database can contain whatever names are appropriate internally, but the user-facing experience must follow the new Genesis terminology.
+
+==================================================
+31. DO NOT CLAIM LIVE BLOCKCHAIN FUNCTIONALITY
+==================================================
+
+The application is being built toward real digital-asset infrastructure.
+
+Do not fabricate:
+
+- Wallet addresses
+- Blockchain transaction hashes
+- Blockchain confirmations
+- Deposits
+- Withdrawals
+- Live G market prices
+- Exchange liquidity
+- Real-world token listings
+
+The investment/G-generation engine can be fully functional using the platform's configured accounting model, but blockchain functionality should only be marked live when an actual provider is integrated and confirms the operation.
+
+==================================================
+32. PERFORMANCE
+==================================================
+
+Do not calculate every user's rewards continuously in the browser.
+
+Do not use a permanent frontend timer for financial accounting.
+
+Use efficient backend/database calculations.
+
+Avoid recalculating unnecessary historical records on every request.
+
+Design the reward engine so it can scale to many users/investments.
+
+==================================================
+33. FINAL VERIFICATION
+==================================================
+
+Before declaring this phase complete:
+
+Run:
+
+npm run check
+
+Run all available tests.
+
+Test the API.
+
+Test authentication.
+
+Test investment creation.
+
+Test reward calculation.
+
+Test duplicate reward protection.
+
+Test Portfolio.
+
+Test Wallet.
+
+Test Admin configuration.
+
+Test mobile layout.
+
+Test desktop layout.
+
+Check browser console.
+
+Fix all errors.
+
+==================================================
+34. GIT REQUIREMENT
+==================================================
+
+When this phase is genuinely complete:
+
+1. Run git status.
+2. Review all changes.
+3. Run tests/checks.
+4. Fix any issues.
+5. Create a clear Git commit.
+6. Push the commit to GitHub main.
+7. Verify origin/main contains the new commit.
+8. Only then report the task complete.
+
+Do NOT skip the Git commit/push requirement.
+
+==================================================
+FINAL SUCCESS CRITERIA
+==================================================
+
+At the end of this phase, a test user should be able to experience this complete backend-backed flow:
+
+LOGIN
+↓
+WALLET
+↓
+SEE AVAILABLE ASSET
+↓
+INVEST USDT/BNB/OTHER SUPPORTED ASSET
+↓
+INVESTMENT CREATED IN DATABASE
+↓
+BALANCE UPDATED
+↓
+G GENERATION CALCULATED BY BACKEND
+↓
+G REWARD ACCOUNTED
+↓
+G BALANCE UPDATED
+↓
+PORTFOLIO SHOWS ACTUAL G GENERATION
+↓
+G ASSET DETAIL SHOWS ACTUAL BALANCE
+↓
+CONVERSION UI USES BACKEND DATA
+↓
+TRANSACTION HISTORY REFLECTS ACTIVITY
+
+The core financial truth must always come from the backend/database.
+
+The UI should make it feel simple:
+
+"Invest your assets → Generate Genesis G → Hold or convert your G."
+
+Do not change the product direction.
+Do not redesign the navigation.
+Do not bring back Positions or Pools.
+
+Build the real investment and G-generation engine underneath the Genesis experience that already exists.
