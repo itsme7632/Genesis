@@ -11,6 +11,7 @@ const state = {
   config: null,
   adminConfig: null,
   walletAssets: [],
+  transactions: [],
   portfolio: { investments: [], generation: [], rewards: { total_generated: "0", today_generated: "0" }, gBalance: "0", gEstimatedValue: "0" },
   selectedProduct: null,
   selectedInvestment: null,
@@ -55,17 +56,22 @@ function authPage() {
   return `<div class="auth-shell"><div class="auth-brand">${GMark()}<span>genesis</span></div><div class="auth-layout"><div class="auth-story"><p class="eyebrow">The Genesis platform</p><h1>Put your assets to work.<br/><em>Generate Genesis G.</em></h1><p>Manage your digital assets, invest with clear terms, and follow your Genesis G generation in one place.</p><div class="auth-points"><span>◈ Wallet-first asset management</span><span>↗ Configurable investment products</span><span>G Pre-launch token ecosystem</span></div></div><div class="card auth-card"><div class="auth-tabs"><button class="${!signup ? "active" : ""}" data-auth-mode="login">Log in</button><button class="${signup ? "active" : ""}" data-auth-mode="signup">Create account</button></div><h2>${signup ? "Create your Genesis account." : "Welcome back."}</h2><p class="auth-sub">${signup ? "Start with a secure account. You can connect wallet infrastructure later." : "Log in with your email or username to continue."}</p><form id="auth-form" class="form-stack">${signup ? `<div class="form-field"><label>Full name</label><input name="fullName" autocomplete="name" required /></div><div class="form-field"><label>Username</label><input name="username" autocomplete="username" pattern="[A-Za-z0-9_]{3,24}" required /></div><div class="form-field"><label>Email</label><input name="email" type="email" autocomplete="email" required /></div>` : `<div class="form-field"><label>Email or username</label><input name="identifier" type="text" autocomplete="username" required /></div>`}<div class="form-field"><label>Password</label><input name="password" type="password" minlength="10" autocomplete="${signup ? "new-password" : "current-password"}" required /></div>${signup ? `<div class="form-field"><label>Confirm password</label><input name="confirmPassword" type="password" minlength="10" autocomplete="new-password" required /></div>` : ""}<p class="auth-error" id="auth-error"></p><button class="btn btn-primary" type="submit">${signup ? "Create account" : "Log in"}</button></form><p class="auth-legal">By continuing, you agree to Genesis platform terms. No external login or OTP is required.</p></div></div><div class="auth-footer">Genesis G is pre-launch. Reference values are informational, not live market prices.</div></div>`;
 }
 function layout(content, title) {
+  const accountLabel = state.user?.account_type === "DEMO"
+    ? "DEMO ACCOUNT"
+    : state.user?.account_type === "DEVELOPMENT_ADMIN"
+      ? "DEVELOPMENT ADMIN"
+      : "Connected account";
   return `<div class="app-shell">
     <aside class="sidebar">
       <div class="brand">${GMark()}<span>genesis</span></div>
       <div class="sidebar-label">Workspace</div>
       <nav class="nav-list">${nav()}</nav>
-      <div class="sidebar-note">${state.user?.role === "ADMIN" ? `<button class="profile-link" data-page="admin" style="color:#d9e2df;padding:10px 6px;margin:0 0 14px">⚙&nbsp; Admin console</button>` : ""}<strong>G is pre-launch</strong>The reference value shown is configured for information only, not a live market price.</div>
+       <div class="sidebar-note">${state.user?.role === "ADMIN" ? `<button class="profile-link" data-page="admin" style="color:#d9e2df;padding:10px 6px;margin:0 0 14px">⚙&nbsp; Admin console</button>` : ""}${state.user?.account_type === "DEMO" ? "<strong>DEMO / TEST ACCOUNT</strong>" : ""}<strong>G is pre-launch</strong>The reference value shown is configured for information only, not a live market price.</div>
     </aside>
     <main class="main">
       <header class="topbar">
         <div><p class="eyebrow">Genesis platform</p><h2 class="top-title">${title}</h2></div>
-        <div class="top-actions"><span class="demo-badge">Connected account</span><button class="avatar" id="profile-toggle" aria-label="Open profile menu">${(state.user?.full_name || "G").charAt(0).toUpperCase()}</button></div>
+         <div class="top-actions"><span class="demo-badge ${state.user?.account_type === "DEMO" ? "demo-account" : ""}">${accountLabel}</span><button class="avatar" id="profile-toggle" aria-label="Open profile menu">${(state.user?.full_name || "G").charAt(0).toUpperCase()}</button></div>
         <div class="profile-menu ${state.profileOpen ? "open" : ""}" id="profile-menu">
           <div class="profile-head"><strong>${state.user?.full_name || "Genesis user"}</strong><span>@${state.user?.username || "user"} · Member since ${state.user?.created_at ? new Date(state.user.created_at).toLocaleDateString() : "today"}</span></div>
           ${["Account", "Security", "Notifications", "Settings", "Transactions", "Help & Support"].map(item => `<button class="profile-link" data-profile="${item}">${item}</button>`).join("")}
@@ -133,7 +139,7 @@ function walletPage() {
   return `<div class="page-intro"><div><p class="eyebrow">Asset management</p><h1>Your wallet.</h1><p>Hold, deposit, withdraw and convert supported digital assets.</p></div><div class="page-actions"><button class="btn btn-secondary" data-modal="withdraw">Withdraw</button><button class="btn btn-primary" data-modal="deposit">Deposit</button></div></div>
     <div class="card stat-card" style="margin-bottom:18px"><div class="stat-label">Total wallet balance <span class="pill">Backend wallet</span></div><div class="stat-value" style="font-size:34px">Not priced</div><div class="stat-meta">A live total appears when a market price source is connected.</div></div>
     <div class="card asset-list">${state.walletAssets.map(item => `${assetRow(item.symbol, item.name, amount(item.amount), item.symbol === "G" ? `$${amount(state.portfolio.gEstimatedValue)}` : "No price source", "detail")}${Number(item.invested_amount || 0) > 0 ? `<div class="asset-invested-note">Invested: ${amount(item.invested_amount)} ${esc(item.symbol)}</div>` : ""}`).join("") || `<div class="empty-state">Your wallet has no configured assets yet.</div>`}</div>
-    <div class="grid grid-2 section"><div class="notice"><span class="notice-icon">i</span><div><strong>Blockchain wallet infrastructure is not enabled</strong><p>Deposit and withdrawal screens are ready for a real provider integration. No addresses or transaction hashes are fabricated.</p></div></div><div class="card split-card"><div class="section-head"><h2>Wallet activity</h2><button class="btn-quiet" data-profile="Transactions">View all →</button></div><div class="empty-state">No confirmed wallet activity yet.</div></div></div>`;
+     <div class="grid grid-2 section"><div class="notice"><span class="notice-icon">i</span><div><strong>Blockchain wallet infrastructure is not enabled</strong><p>Deposit and withdrawal screens are ready for a real provider integration. No addresses or transaction hashes are fabricated.</p></div></div><div class="card split-card"><div class="section-head"><h2>Wallet activity</h2><button class="btn-quiet" data-profile="Transactions">View all →</button></div>${state.transactions.length ? state.transactions.slice(0, 5).map(item => activity(item.type === "CONVERSION" ? "⇄" : item.type === "G_REWARD" ? "↗" : "•", `${item.type.replace("_", " ")}${item.asset ? ` · ${item.asset}` : ""}`, new Date(item.created_at).toLocaleString(), `${Number(item.amount) >= 0 ? "+" : ""}${amount(item.amount)} ${item.asset || ""}`, Number(item.amount) >= 0 ? "up" : "")).join("") : `<div class="empty-state">No confirmed wallet activity yet.</div>`}</div></div></div>`;
 }
 function marketsPage() {
   const genesis = state.config?.genesis;
@@ -179,6 +185,7 @@ function adminPage() {
   const genesis = admin.genesis || state.config?.genesis || {};
   const products = admin.products || state.config?.products || [];
   const assets = admin.assets || state.config?.assets || [];
+  const development = admin.development || {};
   let panel = "";
   if (state.adminTab === "Genesis G") {
     const statusOptions = ["PRE-LAUNCH", "LIVE", "LISTED"].map(value => `<option${value === (genesis.status || "PRE-LAUNCH") ? " selected" : ""}>${value}</option>`).join("");
@@ -187,10 +194,13 @@ function adminPage() {
     panel = `<div class="section-head"><div><h3>Investment products</h3><p>Rates, limits, durations and disclosures are read by the user-facing Invest page.</p></div><button class="btn btn-secondary" data-new-product>New product</button></div>${state.adminNewProduct ? adminProductForm(null, assets) : ""}<div class="admin-products">${products.length ? products.map(product => adminProductForm(product, assets)).join("") : `<div class="empty-state">No products configured.</div>`}</div>`;
   } else if (state.adminTab === "Assets") {
     panel = `<div class="admin-assets">${assets.map(asset => `<div class="setting-line"><div><strong>${esc(asset.symbol)} · ${esc(asset.name)}</strong><span>Wallet display, investing and custody flags</span></div><div class="asset-switches"><label><input type="checkbox" data-asset-flag="${esc(asset.id)}" data-flag="enabled" ${asset.enabled ? "checked" : ""} /> Display</label><label><input type="checkbox" data-asset-flag="${esc(asset.id)}" data-flag="investmentEnabled" ${asset.investment_enabled ? "checked" : ""} /> Invest</label><label><input type="checkbox" data-asset-flag="${esc(asset.id)}" data-flag="conversionEnabled" ${asset.conversion_enabled ? "checked" : ""} /> Convert</label><button class="btn btn-secondary" data-save-asset="${esc(asset.id)}">Save</button></div></div>`).join("")}</div>`;
+  } else if (state.adminTab === "Development testing") {
+    const demo = development.demo;
+    panel = development.enabled ? `<div class="development-panel"><div class="notice"><span class="notice-icon">!</span><div><strong>DEVELOPMENT ONLY</strong><p>These controls operate only on the dedicated DEMO account and are unavailable in production environments.</p></div></div>${demo ? `<div class="demo-summary"><div><strong>${esc(demo.username)}</strong><span>${esc(demo.email)} · ${esc(demo.account_type)}</span></div><span class="pill gold">DEMO / TEST ACCOUNT</span></div><div class="grid grid-2 demo-controls"><button class="btn btn-secondary" data-demo-simulate="1">Simulate 1 hour</button><button class="btn btn-secondary" data-demo-simulate="24">Simulate 24 hours</button><button class="btn btn-secondary" data-demo-simulate="168">Simulate 7 days</button><button class="btn btn-primary" data-demo-reset>Reset demo account</button></div><div class="demo-balance-list">${demo.balances.map(balance => `<div class="setting-line"><div><strong>${esc(balance.symbol)}</strong><span>Available / invested</span></div><strong>${amount(balance.amount)} / ${amount(balance.invested_amount)}</strong></div>`).join("")}</div>` : `<div class="empty-state">No dedicated demo account exists yet.</div>`}</div>` : `<div class="empty-state">Development testing is disabled in this environment.</div>`;
   } else {
     panel = `<div class="empty-state">${esc(state.adminTab)} is protected and ready for a connected service. Investment and Genesis configuration are available above.</div>`;
   }
-  const tabs = ["Genesis G", "Investments", "Assets", "Conversions", "Fees", "Users", "Transactions", "Platform settings", "Audit logs"];
+  const tabs = ["Genesis G", "Investments", "Assets", ...(development.enabled ? ["Development testing"] : []), "Conversions", "Fees", "Users", "Transactions", "Platform settings", "Audit logs"];
   const tabButtons = tabs.map(tab => `<button class="admin-tab ${state.adminTab === tab ? "active" : ""}" data-admin-tab="${esc(tab)}">${esc(tab)}</button>`).join("");
   return `<div class="page-intro"><div><p class="eyebrow">Protected workspace</p><h1>Admin console.</h1><p>Manage persisted Genesis configuration. Changes are audit logged and reflected in the user application.</p></div><span class="pill">Admin · ${esc(state.user?.username || "authorized")}</span></div><div class="admin-shell"><div class="admin-tabs">${tabButtons}</div><div class="card admin-panel"><div class="section-head"><div><h2>${esc(state.adminTab)}</h2><p>Server-side authorization is required for every save.</p></div></div>${panel}<div class="disclosure" style="margin-top:18px">Reference prices are informational until a live market provider is connected. Never describe configured rates as guaranteed returns.</div></div></div>`;
 }
@@ -200,8 +210,8 @@ function modalContent() {
   if (state.modal === "convert") {
     const pairs = (state.config?.conversions?.pairs || []).filter(pair => pair.from === "G");
     const options = pairs.map(pair => `<option value="${esc(pair.to)}" data-rate="${esc(pair.rate)}">${esc(pair.to)}</option>`).join("");
-    const body = pairs.length ? `<div class="form-stack"><div class="form-field"><label>From</label><select disabled><option>Genesis G · Available ${amount(state.portfolio.gBalance)} G</option></select></div><div class="form-field"><label>Amount</label><input id="convert-amount" type="number" min="0" max="${esc(state.portfolio.gBalance)}" value="0" /></div><div class="form-field"><label>To</label><select id="convert-to">${options}</select></div><div class="convert-summary"><div><span>Estimated receive</span><strong id="convert-estimate">0</strong></div><span id="convert-rate-note">Configured rate</span></div><div class="unavailable">Conversion preparation is connected to backend configuration. No conversion transaction will be submitted until the execution provider is enabled.</div></div>` : `<div class="unavailable">Conversion is currently unavailable.</div>`;
-    const confirm = pairs.length ? `<button class="btn btn-primary" data-pending>Confirm conversion</button>` : "";
+    const body = pairs.length ? `<div class="form-stack"><div class="form-field"><label>From</label><select disabled><option>Genesis G · Available ${amount(state.portfolio.gBalance)} G</option></select></div><div class="form-field"><label>Amount</label><input id="convert-amount" type="number" min="0" max="${esc(state.portfolio.gBalance)}" value="0" /></div><div class="form-field"><label>To</label><select id="convert-to">${options}</select></div><div class="convert-summary"><div><span>Estimated receive</span><strong id="convert-estimate">0</strong></div><span id="convert-rate-note">Configured rate</span></div><div class="unavailable">Internal accounting conversion only. No blockchain swap or external transaction is created.</div></div>` : `<div class="unavailable">Conversion is currently unavailable.</div>`;
+    const confirm = pairs.length ? `<button class="btn btn-primary" data-confirm-conversion>Confirm conversion</button>` : "";
     return `<div class="modal"><div class="modal-head"><div><h2>Convert Genesis G</h2><p>Conversion stays inside Wallet and only uses enabled backend pairs.</p></div><button class="close" data-close>×</button></div>${body}<div class="modal-footer"><button class="btn btn-secondary" data-close>Close</button>${confirm}</div></div>`;
   }
   if (state.modal === "asset") {
@@ -276,7 +286,7 @@ function bind() {
     state.profileOpen = false;
     if (el.dataset.profile === "Sign out") {
       await fetch("/api/auth/logout", { method: "POST" });
-      state.user = null; state.walletAssets = []; state.portfolio = { investments: [], rewards: { total_generated: "0", today_generated: "0" } }; render();
+      state.user = null; state.walletAssets = []; state.transactions = []; state.portfolio = { investments: [], rewards: { total_generated: "0", today_generated: "0" } }; render();
     } else { toast(`${el.dataset.profile} is ready for the connected account service.`, "success"); render(); }
   }));
   document.querySelectorAll("[data-modal]").forEach(el => el.addEventListener("click", () => { state.modal = el.dataset.modal; render(); }));
@@ -334,6 +344,28 @@ function bind() {
       toast(error.message);
     }
   });
+  document.querySelector("[data-confirm-conversion]")?.addEventListener("click", async () => {
+    const button = document.querySelector("[data-confirm-conversion]");
+    const amountInput = document.querySelector("#convert-amount");
+    const toInput = document.querySelector("#convert-to");
+    button.disabled = true;
+    try {
+      const response = await fetch("/api/conversions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from: "G", to: toInput.value, amount: amountInput.value })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to complete conversion.");
+      state.modal = null;
+      await loadBackendData();
+      render();
+      toast(`Converted ${amountInput.value} G into ${result.conversion.to_amount} ${toInput.value}.`, "success");
+    } catch (error) {
+      button.disabled = false;
+      toast(error.message);
+    }
+  });
   document.querySelectorAll("[data-admin-tab]").forEach(el => el.addEventListener("click", () => { state.adminTab = el.dataset.adminTab; state.adminNewProduct = false; render(); }));
   document.querySelector("[data-new-product]")?.addEventListener("click", () => { state.adminNewProduct = true; render(); });
   document.querySelectorAll("[data-product-form]").forEach(form => form.addEventListener("submit", async event => {
@@ -378,6 +410,42 @@ function bind() {
       toast("Asset settings saved.", "success");
     } catch (error) { toast(error.message); }
   }));
+  document.querySelectorAll("[data-demo-simulate]").forEach(button => button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const response = await fetch("/api/admin/development/simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hours: Number(button.dataset.demoSimulate) })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to simulate demo time.");
+      state.adminConfig = await (await fetch("/api/admin")).json();
+      await loadBackendData();
+      render();
+      toast(`Simulated ${button.dataset.demoSimulate} hour(s); ${result.accountedPeriods} reward period(s) accounted.`, "success");
+    } catch (error) {
+      button.disabled = false;
+      toast(error.message);
+    }
+  }));
+  document.querySelector("[data-demo-reset]")?.addEventListener("click", async () => {
+    if (!window.confirm("Reset the dedicated demo account balances, investments, rewards, and test transactions?")) return;
+    const button = document.querySelector("[data-demo-reset]");
+    button.disabled = true;
+    try {
+      const response = await fetch("/api/admin/development/reset", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Unable to reset demo account.");
+      state.adminConfig = await (await fetch("/api/admin")).json();
+      await loadBackendData();
+      render();
+      toast("Demo account reset.", "success");
+    } catch (error) {
+      button.disabled = false;
+      toast(error.message);
+    }
+  });
   const amount = document.querySelector("#convert-amount"), to = document.querySelector("#convert-to"), estimate = document.querySelector("#convert-estimate");
   const rateNote = document.querySelector("#convert-rate-note");
   const update = () => {
@@ -392,9 +460,10 @@ function bind() {
 async function loadBackendData() {
   const configResponse = await fetch("/api/config");
   if (configResponse.ok) state.config = await configResponse.json();
-  const [walletResponse, portfolioResponse] = await Promise.all([fetch("/api/wallet"), fetch("/api/portfolio")]);
+  const [walletResponse, portfolioResponse, transactionsResponse] = await Promise.all([fetch("/api/wallet"), fetch("/api/portfolio"), fetch("/api/transactions")]);
   if (walletResponse.ok) state.walletAssets = (await walletResponse.json()).assets;
   if (portfolioResponse.ok) state.portfolio = await portfolioResponse.json();
+  if (transactionsResponse.ok) state.transactions = (await transactionsResponse.json()).transactions;
   if (state.user?.role === "ADMIN") {
     const adminResponse = await fetch("/api/admin");
     if (adminResponse.ok) state.adminConfig = await adminResponse.json();

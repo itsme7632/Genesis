@@ -1,0 +1,738 @@
+GENESIS — PHASE 3: CREATE A REAL DEMO/TEST ENVIRONMENT + COMPLETE USER TEST FLOW
+
+The latest Genesis Phase 2 work has now been manually pushed successfully to GitHub main.
+
+The current product direction is correct and MUST NOT be redesigned.
+
+Keep:
+
+HOME | INVEST | WALLET | PORTFOLIO | MARKETS
+
+Keep the current Genesis G branding, mobile bottom navigation, top-right user initial/profile menu, wallet experience, Invest page, Portfolio/G Generation concept, and Markets page.
+
+Do NOT bring back Positions, Pools, or Ledger-first UX.
+
+This phase has two goals:
+
+1. Create a proper development/demo account that I can personally log into and test.
+2. Make the complete user-facing investment → G generation flow easy to test.
+
+==================================================
+1. CREATE A PERMANENT DEMO ACCOUNT
+==================================================
+
+Create a dedicated development/demo user account in the database.
+
+IMPORTANT:
+
+This must be clearly identified internally as:
+
+DEMO / TEST ACCOUNT
+
+It must NEVER be treated as a real customer account.
+
+Use a dedicated test/demo flag on the user record if the schema supports it. If necessary, add:
+
+isDemo
+or
+accountType = DEMO
+
+Do not create fake activity that looks like real customers.
+
+The demo account should have credentials that Replit can report to me after creation.
+
+Use a clearly identifiable username, for example:
+
+demo
+
+or:
+
+genesis_demo
+
+Use a dedicated demo email such as:
+
+demo@genesis.local
+
+or another clearly non-production test email supported by the application's validation rules.
+
+Create a strong temporary demo password.
+
+DO NOT expose or commit any production secrets.
+
+If the password is stored, store only the secure password hash.
+
+==================================================
+2. DEMO ACCOUNT BALANCES
+==================================================
+
+Fund the demo account with controlled TEST balances so I can actually test the application.
+
+Use clearly labeled DEMO/TEST balances.
+
+Suggested starting balances:
+
+USDT:
+1,000 USDT
+
+BNB:
+1 BNB
+
+BTC:
+0.05 BTC
+
+ETH:
+1 ETH
+
+SOL:
+10 SOL
+
+G:
+0 G initially
+
+IMPORTANT:
+
+These are TEST/DEMO balances only.
+
+Do not present them as real funds.
+
+The account should visibly or contextually indicate that this is a DEMO/TEST environment where appropriate.
+
+==================================================
+3. DO NOT FABRICATE BLOCKCHAIN FUNDS
+==================================================
+
+The demo balances are internal development balances only.
+
+Do NOT create:
+
+fake blockchain transactions
+fake wallet addresses
+fake transaction hashes
+fake blockchain confirmations
+fake deposits
+
+The demo balances are simply controlled database test balances used to exercise the application's financial logic.
+
+==================================================
+4. DEMO INVESTMENT TEST
+==================================================
+
+Configure at least one investment product for testing.
+
+Use:
+
+USDT → Generate G
+
+Example development configuration:
+
+Minimum:
+50 USDT
+
+Maximum:
+10,000 USDT
+
+Reward rate:
+1.5%
+
+Reward frequency:
+Daily
+
+Make sure this is stored in the database and controlled by Admin.
+
+Do not hardcode the rate into frontend code.
+
+==================================================
+5. MAKE THE DEMO EASY TO TEST
+==================================================
+
+I need to be able to log in using the demo credentials and test:
+
+HOME
+↓
+WALLET
+↓
+INVEST
+↓
+SELECT USDT
+↓
+INVEST 500 USDT
+↓
+INVESTMENT CREATED
+↓
+PORTFOLIO
+↓
+G GENERATION
+↓
+G BALANCE
+↓
+WALLET
+↓
+G ASSET
+↓
+CONVERT
+
+Do not require me to manually modify the database for this basic test.
+
+==================================================
+6. DEVELOPMENT REWARD TESTING
+==================================================
+
+Because waiting a full day to test G generation is impractical, create a SAFE DEVELOPMENT-ONLY method to simulate elapsed time or create a controlled test reward.
+
+Do NOT weaken the production reward engine.
+
+Do NOT add a frontend button that allows normal users to create free G.
+
+Instead, implement one of these approaches:
+
+Preferred:
+
+A development-only Admin/Test tool that allows an authorized Admin to set or simulate the effective reward timestamp for the DEMO account.
+
+For example:
+
+Demo account
+Investment started:
+current time
+
+Development test:
+Simulate 24 hours elapsed
+
+Then the normal backend reward engine calculates the appropriate G reward as though 24 hours had elapsed.
+
+The reward must still go through the exact same backend calculation engine used by normal investments.
+
+This is important.
+
+Do NOT simply add:
+
+G += 100
+
+The test must exercise the real reward calculation.
+
+==================================================
+7. DEMO TEST CONTROLS
+==================================================
+
+If appropriate, add a small DEVELOPMENT/TEST section to Admin.
+
+Only visible to authorized Admin users.
+
+Example:
+
+DEVELOPMENT TESTING
+
+Demo Account:
+genesis_demo
+
+Test actions:
+
+[ Simulate 1 Hour ]
+[ Simulate 24 Hours ]
+[ Simulate 7 Days ]
+
+These actions should only modify the development/demo account's effective test time or invoke a safe test-only mechanism.
+
+They must be impossible to execute against normal customer accounts.
+
+Clearly label:
+
+DEVELOPMENT ONLY
+
+Do not expose these controls in production builds.
+
+==================================================
+8. TEST THE G CALCULATION
+==================================================
+
+Use the existing backend calculation engine.
+
+Example:
+
+Demo investment:
+
+500 USDT
+
+Configured rate:
+
+1.5% daily
+
+Simulate:
+
+24 hours
+
+The system should calculate the applicable reward according to the configured reward methodology and G reference price.
+
+Do not hardcode the expected G amount into the UI.
+
+The test should verify:
+
+Investment
+↓
+Elapsed time
+↓
+Reward calculation
+↓
+G generation event
+↓
+G balance
+
+==================================================
+9. PORTFOLIO
+==================================================
+
+Log in as the demo user and verify Portfolio displays:
+
+Total invested
+Active investment
+G generated
+Today's/effective generated G
+G balance
+Estimated G value
+Investment history
+G generation history
+
+The values must come from the backend.
+
+No fake frontend counters.
+
+==================================================
+10. WALLET
+==================================================
+
+Verify the demo user's Wallet shows:
+
+USDT
+BNB
+BTC
+ETH
+SOL
+G
+
+The Wallet should clearly distinguish:
+
+Available balance
+
+and, where applicable:
+
+Invested balance
+
+Example after investing 500 USDT:
+
+Available USDT:
+500
+
+Invested USDT:
+500
+
+The exact display should follow the existing Wallet UI.
+
+==================================================
+11. G ASSET
+==================================================
+
+Open the Genesis G asset.
+
+Verify it shows:
+
+Genesis
+G
+
+Balance:
+actual demo balance
+
+Estimated value:
+actual balance × configured reference price
+
+Status:
+PRE-LAUNCH
+
+Reference Price:
+configured Admin value
+
+Total Generated:
+actual
+
+Today's Generated:
+actual
+
+Do not call the reference price a live market price.
+
+==================================================
+12. CONVERSION TEST PREPARATION
+==================================================
+
+Keep conversion inside Wallet.
+
+No separate Swap page.
+
+Make sure the demo account can reach the conversion UI.
+
+At minimum configure a test conversion pair:
+
+G → USDT
+
+Use a clearly marked development/test configuration if actual conversion execution is not yet connected to a real provider.
+
+Do not pretend this is a blockchain swap.
+
+If the existing backend conversion engine can safely execute an internal accounting conversion, test it using the demo account.
+
+Verify:
+
+G decreases
+USDT increases
+Conversion record is created
+Transaction history is updated
+
+Everything must be atomic.
+
+==================================================
+13. ADMIN ACCOUNT
+==================================================
+
+IMPORTANT:
+
+Also verify whether a permanent development Admin account currently exists.
+
+If there is no usable Admin account, create one.
+
+It must be clearly marked:
+
+DEVELOPMENT ADMIN
+
+The Admin must be able to log in and access the existing Admin console.
+
+Admin should be able to configure:
+
+G
+Investment products
+Assets
+Conversion pairs
+Fees
+Other existing platform settings
+
+Do NOT hardcode an Admin password into source code.
+
+Report the development Admin credentials securely to me after creation.
+
+==================================================
+14. ADMIN TEST
+==================================================
+
+Using the development Admin account, verify:
+
+1. Login
+2. Open Admin
+3. View G configuration
+4. Change G reference price
+5. View investment product
+6. Change reward rate
+7. Save
+8. Log in as demo user
+9. Confirm the user-facing application reflects the updated configuration
+
+Then restore the intended development configuration.
+
+==================================================
+15. DEMO ACCOUNT RESET
+==================================================
+
+Create a safe Admin/Test mechanism to reset the DEMO account.
+
+Example:
+
+RESET DEMO ACCOUNT
+
+This should restore:
+
+USDT:
+1,000
+
+BNB:
+1
+
+BTC:
+0.05
+
+ETH:
+1
+
+SOL:
+10
+
+G:
+0
+
+Investments:
+none
+
+Rewards:
+none
+
+Transactions:
+test/demo records only
+
+This reset must only work for the dedicated DEMO account.
+
+Do not allow a normal user to reset their own balance.
+
+Clearly label the action:
+
+DEVELOPMENT ONLY
+
+==================================================
+16. DEMO DATA LABELING
+==================================================
+
+The application should make it clear when the current account is a demo/test account.
+
+Do not make the demo account look like a real funded customer account.
+
+A subtle label is enough:
+
+DEMO ACCOUNT
+
+or:
+
+TEST ENVIRONMENT
+
+Do not clutter the entire application with warnings.
+
+==================================================
+17. SECURITY
+==================================================
+
+The following must remain server-authoritative:
+
+Wallet balances
+Investments
+Reward calculations
+G generation
+G balances
+Conversion amounts
+Fees
+Investment rates
+G reference price
+Admin configuration
+
+Never trust financial values supplied by the frontend.
+
+Never allow a normal user to:
+
+change their balance
+change reward rate
+create G
+change G price
+access Admin
+modify another user's investment
+
+==================================================
+18. TEST ACCOUNT DATA ISOLATION
+==================================================
+
+Make sure demo data is isolated from normal users.
+
+The demo account should not affect:
+
+- real user balances
+- aggregate customer statistics
+- production reporting
+- real transaction totals
+- real market data
+
+If aggregate queries exist, exclude demo/test records where appropriate.
+
+==================================================
+19. TESTING
+==================================================
+
+Perform an end-to-end test using the actual demo account.
+
+Test:
+
+ADMIN LOGIN
+↓
+CONFIGURE INVESTMENT
+↓
+DEMO LOGIN
+↓
+VIEW WALLET
+↓
+INVEST 500 USDT
+↓
+VERIFY BALANCE
+↓
+VERIFY INVESTMENT
+↓
+SIMULATE 24 HOURS
+↓
+OPEN PORTFOLIO
+↓
+VERIFY G GENERATED
+↓
+OPEN G WALLET ASSET
+↓
+VERIFY G BALANCE
+↓
+OPEN CONVERT
+↓
+CONVERT G → USDT if configured
+↓
+VERIFY G DECREASE
+↓
+VERIFY USDT INCREASE
+↓
+VERIFY TRANSACTION HISTORY
+
+Test invalid cases too:
+
+Insufficient balance
+Below minimum
+Above maximum
+Disabled product
+Unauthorized access
+Duplicate reward calculation
+
+==================================================
+20. DO NOT CHANGE THE PRODUCT DESIGN
+==================================================
+
+Do not redesign:
+
+Home
+Invest
+Wallet
+Portfolio
+Markets
+
+Do not change mobile bottom navigation.
+
+Keep:
+
+Home | Invest | Wallet | Portfolio | Markets
+
+Keep Profile/avatar top-right.
+
+Keep Genesis G branding.
+
+Keep the current premium ivory/navy/emerald/gold visual system.
+
+==================================================
+21. PRODUCTION SAFETY
+==================================================
+
+The demo/test functionality must be development-only.
+
+Do not create a backdoor.
+
+Do not create hidden endpoints that can manipulate production customer balances.
+
+Do not create a universal "give user G" endpoint.
+
+Do not disable authentication.
+
+Do not bypass authorization.
+
+Use explicit DEMO account checks and Admin authorization.
+
+==================================================
+22. TESTING DOCUMENTATION
+==================================================
+
+Update replit.md with:
+
+Demo account purpose
+Demo username
+How to access Admin
+How to reset demo account
+How to run development reward simulation
+How to test Investment → G generation
+How to distinguish demo data from real data
+
+Do not put sensitive production secrets in documentation.
+
+==================================================
+23. FINAL VERIFICATION
+==================================================
+
+Run:
+
+npm run check
+
+Run all available tests.
+
+Run git diff --check.
+
+Verify preview.
+
+Verify no browser console errors.
+
+Verify database operations.
+
+Verify authentication.
+
+Verify Admin authorization.
+
+Verify demo account.
+
+Verify investment creation.
+
+Verify reward calculation.
+
+Verify reward idempotency.
+
+Verify Portfolio.
+
+Verify Wallet.
+
+Verify G balance.
+
+Verify conversion behavior.
+
+==================================================
+24. GIT REQUIREMENT
+==================================================
+
+When everything is complete:
+
+1. Run git status.
+2. Review all changes.
+3. Run tests/checks.
+4. Fix errors.
+5. Create a clear Git commit.
+6. Push the commit to GitHub main.
+7. Verify origin/main contains the new commit.
+8. Only then report completion.
+
+If GitHub authentication fails again, do not claim the push succeeded. Leave the local commit intact and report the exact error.
+
+==================================================
+FINAL REPORT REQUIREMENT
+==================================================
+
+When finished, report:
+
+1. Demo username
+2. Demo email
+3. Demo password
+4. Demo starting balances
+5. Development Admin username
+6. Development Admin email
+7. Development Admin password
+8. How to test the Investment → G flow
+9. How to simulate reward time
+10. How to reset the demo account
+11. Git commit hash
+12. Whether the commit was successfully pushed to GitHub main
+
+IMPORTANT:
+
+Do not expose any production secrets.
+
+The demo credentials are specifically for my development/testing use.
+
+The goal is that I can open the running Genesis app right now, log in with the provided DEMO account, see funded test assets, invest them, generate G through the real backend reward engine, see the result in Portfolio and Wallet, and test the rest of the user journey myself.
+
+Do not redesign the application.
+Build the testable functionality underneath the existing Genesis experience.

@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
+  account_type TEXT NOT NULL DEFAULT 'CUSTOMER',
   status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'SUSPENDED', 'CLOSED')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -231,6 +232,7 @@ FROM assets WHERE symbol = 'BNB'
 AND NOT EXISTS (SELECT 1 FROM investment_products p WHERE p.name = 'BNB → Genesis G');
 
 -- Compatibility additions for databases created before Phase 2.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS account_type TEXT NOT NULL DEFAULT 'CUSTOMER';
 ALTER TABLE wallet_balances ADD COLUMN IF NOT EXISTS invested_amount NUMERIC(30, 12) NOT NULL DEFAULT 0;
 ALTER TABLE investment_products ADD COLUMN IF NOT EXISTS reward_frequency TEXT NOT NULL DEFAULT 'DAILY';
 ALTER TABLE investment_products ADD COLUMN IF NOT EXISTS duration_days INTEGER;
@@ -269,3 +271,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS g_generation_events_investment_period_idx
   ON g_generation_events (investment_id, period_key);
 CREATE INDEX IF NOT EXISTS investments_user_status_idx ON investments (user_id, status);
 CREATE INDEX IF NOT EXISTS g_rewards_user_accrued_idx ON g_rewards (user_id, accrued_at DESC);
+CREATE INDEX IF NOT EXISTS users_account_type_idx ON users (account_type);
+
+UPDATE investment_products
+SET maximum_amount = 10000,
+    reward_rate = 1.5,
+    reward_frequency = 'DAILY',
+    rate_unit = 'DAILY',
+    updated_at = NOW()
+WHERE name = 'USDT → Genesis G';

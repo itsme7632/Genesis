@@ -100,7 +100,7 @@ async function currentUser(req) {
   const rawToken = getCookies(req).genesis_session;
   if (!rawToken) return null;
   const result = await pool.query(
-    `SELECT u.id, u.full_name, u.username, u.email, u.role, u.status, u.created_at
+    `SELECT u.id, u.full_name, u.username, u.email, u.role, u.account_type, u.status, u.created_at
      FROM sessions s JOIN users u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > NOW() AND u.status = 'ACTIVE'`,
     [tokenHash(rawToken)]
@@ -119,6 +119,12 @@ async function requireUser(req, res) {
 
 function requireAdmin(user) {
   if (user.role !== "ADMIN") throw new ApiError(403, "Admin authorization required.");
+}
+
+function requireDevelopmentEnvironment() {
+  if (process.env.NODE_ENV === "production" || process.env.REPLIT_DEPLOYMENT === "1") {
+    throw new ApiError(404, "Development testing is unavailable in this environment.");
+  }
 }
 
 async function createSession(userId, res) {
@@ -150,7 +156,7 @@ async function authSignup(req, res) {
   try {
     await client.query("BEGIN");
     const inserted = await client.query(
-      "INSERT INTO users (full_name, username, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, full_name, username, email, role, created_at",
+      "INSERT INTO users (full_name, username, email, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, full_name, username, email, role, account_type, created_at",
       [fullName, username, email, passwordHash]
     );
     const user = inserted.rows[0];
@@ -179,7 +185,7 @@ async function authLogin(req, res) {
   if (Date.now() > attempt.resetAt) { attempt.count = 0; attempt.resetAt = Date.now() + 900_000; }
   if (attempt.count >= 10) throw new ApiError(429, "Too many attempts. Try again later.");
   const result = await pool.query(
-    "SELECT id, full_name, username, email, password_hash, role, created_at FROM users WHERE email = $1 OR username = $1",
+    "SELECT id, full_name, username, email, password_hash, role, account_type, created_at FROM users WHERE email = $1 OR username = $1",
     [identifier]
   );
   const user = result.rows[0];
@@ -619,6 +625,47 @@ async function assetsApi(res) {
   json(res, 200, { assets: result.rows });
 }
 
+async function demoSummary(userId = null, client = pool) {
+  const userQuery = userId
+    ? client.query(
+      `SELECT id, full_name, username, email, account_type, role, status
+       FROM users WHERE id = $1 AND account_type = 'DEMO'`,
+      [userId]
+    )
+    : client.query(
+      `SELECT id, full_name, username, email, account_type, role, status
+       FROM users WHERE account_type = 'DEMO' ORDER BY created_at LIMIT 1`
+    );
+  const userResult = await userQuery;
+  const demo = userResult.rows[0];
+  if (!demo) return null;
+  const [balances, investments, rewards] = await Promise.all([
+    client.query(
+      `SELECT a.symbol, wb.amount, wb.invested_amount
+       FROM wallets w JOIN wallet_balances wb ON wb.wallet_id = w.id
+       JOIN assets a ON a.id = wb.asset_id
+       WHERE w.user_id = $1 ORDER BY CASE WHEN a.symbol = 'G' THEN 0 ELSE 1 END, a.symbol`,
+      [demo.id]
+    ),
+    client.query(
+      `SELECT COUNT(*)::integer AS count, COALESCE(SUM(principal), 0) AS principal
+       FROM investments WHERE user_id = $1 AND status = 'ACTIVE'`,
+      [demo.id]
+    ),
+    client.query(
+      `SELECT COUNT(*)::integer AS count, COALESCE(SUM(amount), 0) AS amount
+       FROM g_rewards WHERE user_id = $1 AND status = 'ACCOUNTED'`,
+      [demo.id]
+    )
+  ]);
+  return {
+    ...demo,
+    balances: balances.rows,
+    activeInvestments: investments.rows[0],
+    rewards: rewards.rows[0]
+  };
+}
+
 async function adminConfigApi(res, user) {
   requireAdmin(user);
   const [config, products, assets, genesis, pairs, rewardModel] = await Promise.all([
@@ -643,7 +690,11 @@ async function adminConfigApi(res, user) {
     assets: assets.rows,
     genesis,
     conversions: pairs,
-    rewardModel
+    rewardModel,
+    development: {
+      enabled: process.env.NODE_ENV !== "production" && process.env.REPLIT_DEPLOYMENT !== "1",
+      demo: await demoSummary()
+    }
   });
 }
 
@@ -666,7 +717,7 @@ function productPayload(body) {
     rewardRate,
     rewardFrequency,
     durationDays: body.durationDays === "" || body.durationDays == null ? null : Number(body.durationDays),
-    feeRate: body.feeRate === "" || body.feeRate == null ? "0" : decimalInput(body.feeRate, "Fee rate"),
+    feeRate: body.feeRate === "" || body.feeRate == null ? "0" : nonNegativeDecimalInput(body.feeRate, "Fee rate"),
     durationTerms: String(body.durationTerms || "").trim() || "Terms subject to platform availability.",
     riskTerms: String(body.riskTerms || "").trim() || "Review applicable platform terms and risks.",
     status: ["ACTIVE", "PAUSED", "CLOSED"].includes(String(body.status || "").toUpperCase()) ? String(body.status).toUpperCase() : "ACTIVE"
@@ -773,6 +824,215 @@ async function saveAsset(req, res, user, assetId) {
   json(res, 200, { asset: result.rows[0] });
 }
 
+async function transactionsApi(req, res, user) {
+  const result = await pool.query(
+    `SELECT t.id, t.type, t.amount, t.status, t.reference_id, t.metadata, t.created_at,
+            a.symbol AS asset
+     FROM transactions t LEFT JOIN assets a ON a.id = t.asset_id
+     WHERE t.user_id = $1
+     ORDER BY t.created_at DESC LIMIT 100`,
+    [user.id]
+  );
+  json(res, 200, { transactions: result.rows });
+}
+
+function nonNegativeDecimalInput(value, label) {
+  const normalized = typeof value === "number" ? String(value) : String(value ?? "").trim();
+  if (!/^(?:0|[1-9]\d*)(?:\.\d{1,18})?$/.test(normalized)) {
+    throw new ApiError(400, `${label} must be a valid non-negative decimal.`);
+  }
+  return normalized;
+}
+
+async function createConversion(req, res, user) {
+  await accrueRewards(user.id);
+  const body = await readBody(req);
+  const from = String(body.from || "").trim().toUpperCase();
+  const to = String(body.to || "").trim().toUpperCase();
+  const fromAmount = decimalInput(body.amount, "Conversion amount");
+  if (!from || !to || from === to) throw new ApiError(400, "Choose a valid conversion pair.");
+
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const settings = await setting("conversion_pairs", client);
+    const pair = (settings?.pairs || []).find(item => String(item.from).toUpperCase() === from && String(item.to).toUpperCase() === to);
+    if (!pair) throw new ApiError(409, "This conversion pair is not enabled.");
+    const rate = nonNegativeDecimalInput(pair.rate, "Conversion rate");
+    const feeRate = nonNegativeDecimalInput(pair.fee ?? "0", "Conversion fee");
+    if (Number(rate) <= 0) throw new ApiError(409, "This conversion pair has no usable rate.");
+
+    const assetsResult = await client.query(
+      `SELECT id, symbol, decimals, enabled, conversion_enabled
+       FROM assets WHERE symbol = ANY($1::text[]) FOR UPDATE`,
+      [[from, to]]
+    );
+    const fromAsset = assetsResult.rows.find(asset => asset.symbol === from);
+    const toAsset = assetsResult.rows.find(asset => asset.symbol === to);
+    if (!fromAsset || !toAsset || !fromAsset.enabled || !toAsset.enabled || !fromAsset.conversion_enabled || !toAsset.conversion_enabled) {
+      throw new ApiError(409, "One of these assets is not enabled for conversion.");
+    }
+    if (decimalPlaces(fromAmount) > fromAsset.decimals) {
+      throw new ApiError(400, `Amount supports up to ${fromAsset.decimals} decimal places.`);
+    }
+
+    const balancesResult = await client.query(
+      `SELECT wb.id, wb.asset_id, wb.amount
+       FROM wallet_balances wb JOIN wallets w ON w.id = wb.wallet_id
+       WHERE w.user_id = $1 AND wb.asset_id = ANY($2::uuid[]) FOR UPDATE`,
+      [user.id, [fromAsset.id, toAsset.id]]
+    );
+    const fromBalance = balancesResult.rows.find(balance => balance.asset_id === fromAsset.id);
+    const toBalance = balancesResult.rows.find(balance => balance.asset_id === toAsset.id);
+    if (!fromBalance || !toBalance) throw new ApiError(409, "Your wallet is not configured for this conversion.");
+    const comparison = await client.query(
+      "SELECT $1::numeric > $2::numeric AS insufficient",
+      [fromAmount, fromBalance.amount]
+    );
+    if (comparison.rows[0].insufficient) throw new ApiError(400, `Insufficient available ${from} balance.`);
+
+    const quote = await client.query(
+      `SELECT $1::numeric * $2::numeric AS gross,
+              ($1::numeric * $2::numeric) * $3::numeric / 100 AS fee`,
+      [fromAmount, rate, feeRate]
+    );
+    const gross = quote.rows[0].gross;
+    const fee = quote.rows[0].fee;
+    const net = await client.query("SELECT $1::numeric - $2::numeric AS net", [gross, fee]);
+    if (Number(net.rows[0].net) <= 0) throw new ApiError(400, "Conversion fee exceeds the conversion value.");
+
+    const conversion = await client.query(
+      `INSERT INTO conversions
+         (user_id, from_asset_id, to_asset_id, from_amount, rate, fee, to_amount, status, completed_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'COMPLETED', NOW())
+       RETURNING id, from_amount, rate, fee, to_amount, status, completed_at`,
+      [user.id, fromAsset.id, toAsset.id, fromAmount, rate, fee, net.rows[0].net]
+    );
+    const conversionId = conversion.rows[0].id;
+    await client.query("UPDATE wallet_balances SET amount = amount - $1, updated_at = NOW() WHERE id = $2", [fromAmount, fromBalance.id]);
+    await client.query("UPDATE wallet_balances SET amount = amount + $1, updated_at = NOW() WHERE id = $2", [net.rows[0].net, toBalance.id]);
+    await client.query(
+      `INSERT INTO transactions (user_id, asset_id, type, amount, reference_id, status, metadata)
+       VALUES
+         ($1, $2, 'CONVERSION', $3, $4, 'COMPLETED', $5::jsonb),
+         ($1, $6, 'CONVERSION', $7, $4, 'COMPLETED', $8::jsonb)`,
+      [
+        user.id,
+        fromAsset.id,
+        `-${fromAmount}`,
+        conversionId,
+        JSON.stringify({ conversionId, direction: "OUT", from, to, rate, fee, internalAccounting: true }),
+        toAsset.id,
+        net.rows[0].net,
+        JSON.stringify({ conversionId, direction: "IN", from, to, rate, fee, internalAccounting: true })
+      ]
+    );
+    await client.query(
+      `INSERT INTO audit_logs (actor_user_id, action, entity_type, entity_id, after_data)
+       VALUES ($1, 'CONVERSION_COMPLETED', 'CONVERSION', $2, $3::jsonb)`,
+      [user.id, conversionId, JSON.stringify({ from, to, fromAmount, toAmount: net.rows[0].net, rate, fee, internalAccounting: true })]
+    );
+    await client.query("COMMIT");
+    json(res, 201, { conversion: conversion.rows[0], from, to, internalAccounting: true });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function developmentApi(res, user) {
+  requireAdmin(user);
+  requireDevelopmentEnvironment();
+  json(res, 200, { enabled: true, demo: await demoSummary() });
+}
+
+async function simulateDemoTime(req, res, user) {
+  requireAdmin(user);
+  requireDevelopmentEnvironment();
+  const body = await readBody(req);
+  const hours = Number(body.hours);
+  if (![1, 24, 168].includes(hours)) throw new ApiError(400, "Choose a supported simulation window.");
+  const client = await pool.connect();
+  let demoId;
+  try {
+    await client.query("BEGIN");
+    const demoResult = await client.query("SELECT id FROM users WHERE account_type = 'DEMO' FOR UPDATE");
+    if (!demoResult.rows[0]) throw new ApiError(404, "The development demo account does not exist.");
+    demoId = demoResult.rows[0].id;
+    await client.query(
+      `UPDATE investments
+       SET started_at = started_at - ($1::numeric * INTERVAL '1 hour')
+       WHERE user_id = $2 AND status = 'ACTIVE'`,
+      [hours, demoId]
+    );
+    await client.query(
+      `INSERT INTO audit_logs (actor_user_id, action, entity_type, entity_id, after_data)
+       VALUES ($1, 'DEMO_TIME_SIMULATED', 'USER', $2, $3::jsonb)`,
+      [user.id, demoId, JSON.stringify({ hours, developmentOnly: true })]
+    );
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+  const accrual = await accrueRewards(demoId);
+  json(res, 200, { hours, accountedPeriods: accrual.accounted, demo: await demoSummary(demoId) });
+}
+
+async function resetDemoAccount(req, res, user) {
+  requireAdmin(user);
+  requireDevelopmentEnvironment();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const demoResult = await client.query("SELECT id FROM users WHERE account_type = 'DEMO' FOR UPDATE");
+    if (!demoResult.rows[0]) throw new ApiError(404, "The development demo account does not exist.");
+    const demoId = demoResult.rows[0].id;
+    await client.query("DELETE FROM g_generation_events WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM g_rewards WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM transactions WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM conversions WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM deposits WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM withdrawals WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM investments WHERE user_id = $1", [demoId]);
+    await client.query("DELETE FROM audit_logs WHERE actor_user_id = $1", [demoId]);
+    await client.query(
+      `UPDATE wallet_balances wb
+       SET amount = CASE a.symbol
+         WHEN 'USDT' THEN 1000
+         WHEN 'BNB' THEN 1
+         WHEN 'BTC' THEN 0.05
+         WHEN 'ETH' THEN 1
+         WHEN 'SOL' THEN 10
+         WHEN 'G' THEN 0
+         ELSE 0
+       END,
+       invested_amount = 0,
+       updated_at = NOW()
+       FROM assets a
+       WHERE wb.asset_id = a.id
+         AND wb.wallet_id = (SELECT id FROM wallets WHERE user_id = $1)`,
+      [demoId]
+    );
+    await client.query(
+      `INSERT INTO audit_logs (actor_user_id, action, entity_type, entity_id, after_data)
+       VALUES ($1, 'DEMO_ACCOUNT_RESET', 'USER', $2, $3::jsonb)`,
+      [user.id, demoId, JSON.stringify({ developmentOnly: true, balancesReset: true })]
+    );
+    await client.query("COMMIT");
+    json(res, 200, { reset: true, demo: await demoSummary(demoId) });
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 async function userApi(req, res, user) {
   json(res, 200, { user });
 }
@@ -790,8 +1050,10 @@ async function api(req, res, pathname) {
   if (req.method === "GET" && pathname === "/api/me") return userApi(req, res, user);
   if (req.method === "GET" && pathname === "/api/wallet") return walletApi(req, res, user);
   if (req.method === "GET" && pathname === "/api/portfolio") return portfolioApi(req, res, user);
+  if (req.method === "GET" && pathname === "/api/transactions") return transactionsApi(req, res, user);
   if (req.method === "GET" && pathname === "/api/investments") return investmentsApi(req, res, user);
   if (req.method === "POST" && pathname === "/api/investments") return createInvestment(req, res, user);
+  if (req.method === "POST" && pathname === "/api/conversions") return createConversion(req, res, user);
   if (req.method === "GET" && pathname === "/api/g-rewards") return rewardsApi(req, res, user);
   if (req.method === "GET" && pathname === "/api/g-generation") return generationApi(req, res, user);
 
@@ -802,6 +1064,11 @@ async function api(req, res, pathname) {
     requireAdmin(user);
     if (req.method === "GET") return adminConfigApi(res, user);
   }
+  if (pathname === "/api/admin/development") {
+    if (req.method === "GET") return developmentApi(res, user);
+  }
+  if (pathname === "/api/admin/development/simulate" && req.method === "POST") return simulateDemoTime(req, res, user);
+  if (pathname === "/api/admin/development/reset" && req.method === "POST") return resetDemoAccount(req, res, user);
   if (pathname === "/api/admin/genesis" && req.method === "POST") return saveGenesisSettings(req, res, user);
   const productMatch = pathname.match(/^\/api\/admin\/investment-products(?:\/([0-9a-f-]+))?$/i);
   if (productMatch && req.method === "POST") return saveProduct(req, res, user, productMatch[1]);

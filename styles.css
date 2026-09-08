@@ -56,6 +56,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .top-title { margin: 0; font-size: 17px; letter-spacing: -.025em; }
 .top-actions { display: flex; align-items: center; gap: 14px; }
 .demo-badge { border: 1px solid #ead9a9; color: #92702a; background: var(--soft-gold); padding: 7px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.demo-badge.demo-account { border-color: #d7bd70; background: #f7e9bb; }
 .avatar { border: 0; background: var(--navy); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-weight: 700; display: grid; place-items: center; }
 .avatar:hover { background: var(--green); }
 .profile-menu { display:none; position: absolute; top: 68px; right: 40px; width: 246px; padding: 9px; background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 16px; }
@@ -190,6 +191,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .asset-switches { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:9px 13px; }
 .asset-switches label { display:inline-flex; align-items:center; gap:5px; color:var(--muted); font-size:11px; white-space:nowrap; }
 .asset-switches input { accent-color:var(--green); }
+.development-panel { display:grid; gap:16px; }
+.demo-summary { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 0; border-bottom:1px solid var(--line); }
+.demo-summary strong, .demo-summary span { display:block; }
+.demo-summary strong { font-size:14px; }
+.demo-summary span:not(.pill) { color:var(--muted); font-size:11px; margin-top:3px; }
+.demo-controls { margin:0; }
+.demo-controls .btn { width:100%; }
+.demo-balance-list { border-top:1px solid var(--line); }
 .setting-line { display:flex; gap:14px; align-items:center; justify-content:space-between; padding:15px 0; border-bottom:1px solid var(--line); }
 .setting-line:last-child { border:0; }
 .setting-line strong { display:block; font-size:13px; }
